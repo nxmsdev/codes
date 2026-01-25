@@ -501,12 +501,9 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         else if (args.length == 5 && args[0].equalsIgnoreCase("stworz") && sender.hasPermission("codes.admin")) {
             String currentArg = args[4].toLowerCase();
 
-            if (currentArg.isEmpty()) {
-                completions.add("<przedmiot|permisja|ranga>");
-            }
-
             if (currentArg.isEmpty() || "przedmiot".startsWith(currentArg)) {
                 completions.add("przedmiot");
+                completions.add("przedmiot:");
             }
             if (currentArg.isEmpty() || "permisja:".startsWith(currentArg)) {
                 completions.add("permisja:");
