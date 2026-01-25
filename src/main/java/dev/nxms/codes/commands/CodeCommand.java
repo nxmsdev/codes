@@ -119,7 +119,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         String rewardArg = args[4];
         boolean success;
 
-        if (rewardArg.equalsIgnoreCase("item") || rewardArg.equalsIgnoreCase("przedmiot")) {
+        if (rewardArg.equalsIgnoreCase("przedmiot")) {
             if (!(sender instanceof Player player)) {
                 msg.send(sender, "must-be-player");
                 return true;
@@ -133,8 +133,8 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
 
             success = codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, heldItem.clone());
         }
-        else if (rewardArg.toLowerCase().startsWith("item:") || rewardArg.toLowerCase().startsWith("przedmiot:")) {
-            String rewardData = rewardArg.substring(rewardArg.indexOf(':') + 1);
+        else if (rewardArg.toLowerCase().startsWith("przedmiot:")) {
+            String rewardData = rewardArg.substring(10);
             String[] parts = rewardData.split(":");
 
             if (parts.length < 1 || parts[0].isEmpty()) {
@@ -155,8 +155,8 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
 
             Material material = Material.matchMaterial(materialName);
             if (material == null) {
-                sender.sendMessage("§cNieznany przedmiot: §e" + materialName);
-                sender.sendMessage("§7Użyj nazwy jak: DIAMOND, IRON_INGOT, GOLDEN_APPLE");
+                msg.send(sender, "unknown-material", MessageManager.placeholders("material", materialName));
+                msg.send(sender, "unknown-material-hint");
                 return true;
             }
 
@@ -243,10 +243,10 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sender.sendMessage(msg.colorize("&cPoprawne użycie:"));
-            sender.sendMessage(msg.colorize("&e/kod lista aktywne &7- Lista aktywnych kodów"));
-            sender.sendMessage(msg.colorize("&e/kod lista zuzyte &7- Lista zużytych kodów"));
-            sender.sendMessage(msg.colorize("&e/kod lista zuzyte wyczysc &7- Wyczyść zużyte kody"));
+            msg.sendRaw(sender, "list-usage-header");
+            msg.sendRaw(sender, "list-usage-active");
+            msg.sendRaw(sender, "list-usage-used");
+            msg.sendRaw(sender, "list-usage-clear");
             return true;
         }
 
@@ -258,23 +258,28 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             case "zuzyte":
                 return handleListUsed(sender, args);
             default:
-                sender.sendMessage(msg.colorize("&cNieznany typ listy: &e" + listType));
-                sender.sendMessage(msg.colorize("&7Dostępne: &eaktywne&7, &ezuzyte"));
+                msg.sendRaw(sender, "list-unknown-type", MessageManager.placeholders("type", listType));
+                msg.sendRaw(sender, "list-available-types");
                 return true;
         }
     }
 
     private boolean handleListActive(CommandSender sender) {
-        sender.sendMessage(msg.colorize("&6&m─────&r &6Lista aktywnych kodów &6&m─────"));
+        msg.sendRaw(sender, "list-active-header");
 
         if (codeManager.getAllCodes().isEmpty()) {
-            sender.sendMessage(msg.colorize("&7Brak aktywnych kodów."));
+            msg.sendRaw(sender, "list-active-empty");
         } else {
             for (Code code : codeManager.getAllCodes()) {
                 if (code.isGlobalUnlimited()) {
-                    sender.sendMessage(msg.colorize("&7• &e" + code.getName() + " &7(&a∞ nielimitowane&7)"));
+                    msg.sendRaw(sender, "list-active-entry-unlimited", MessageManager.placeholders(
+                            "code", code.getName()
+                    ));
                 } else {
-                    sender.sendMessage(msg.colorize("&7• &e" + code.getName() + " &7(Pozostało: &a" + code.getRemainingGlobalUsesDisplay() + "&7)"));
+                    msg.sendRaw(sender, "list-active-entry", MessageManager.placeholders(
+                            "code", code.getName(),
+                            "uses", code.getRemainingGlobalUsesDisplay()
+                    ));
                 }
             }
         }
@@ -285,23 +290,27 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
     private boolean handleListUsed(CommandSender sender, String[] args) {
         if (args.length >= 3 && args[2].equalsIgnoreCase("wyczysc")) {
             if (codeManager.clearUsedCodes()) {
-                msg.send(sender, "used-codes-cleared");
+                msg.send(sender, "list-used-cleared");
             } else {
-                sender.sendMessage(msg.colorize("&7Brak zużytych kodów do wyczyszczenia."));
+                msg.sendRaw(sender, "list-used-nothing-to-clear");
             }
             return true;
         }
 
-        sender.sendMessage(msg.colorize("&6&m─────&r &6Lista zużytych kodów &6&m─────"));
+        msg.sendRaw(sender, "list-used-header");
 
         var usedCodes = codeManager.getUsedCodes();
         if (usedCodes.isEmpty()) {
-            sender.sendMessage(msg.colorize("&7Brak zużytych kodów."));
+            msg.sendRaw(sender, "list-used-empty");
         } else {
             for (CodeManager.UsedCodeInfo info : usedCodes) {
-                sender.sendMessage(msg.colorize("&7• &e" + info.name() + " &7| &a" + info.totalUses() + "x &7| " + info.rewardDisplay()));
+                msg.sendRaw(sender, "list-used-entry", MessageManager.placeholders(
+                        "code", info.name(),
+                        "uses", String.valueOf(info.totalUses()),
+                        "reward", info.rewardDisplay()
+                ));
             }
-            sender.sendMessage(msg.colorize("&7Wpisz &e/kod lista zuzyte wyczysc &7aby wyczyścić listę"));
+            msg.sendRaw(sender, "list-used-clear-hint");
         }
 
         return true;
@@ -314,7 +323,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            sender.sendMessage("§cPoprawne użycie: /kod info <nazwa>");
+            msg.sendRaw(sender, "info-usage");
             return true;
         }
 
@@ -324,22 +333,33 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        sender.sendMessage(msg.colorize("&6&m─────&r &6Kod: " + code.getName() + " &6&m─────"));
+        msg.sendRaw(sender, "info-header", MessageManager.placeholders("code", code.getName()));
 
         if (code.isGlobalUnlimited()) {
-            sender.sendMessage(msg.colorize("&7Użycia globalne: &e" + code.getGlobalUses() + "&7/&a∞"));
+            msg.sendRaw(sender, "info-global-uses-unlimited", MessageManager.placeholders(
+                    "current", String.valueOf(code.getGlobalUses())
+            ));
         } else {
-            sender.sendMessage(msg.colorize("&7Użycia globalne: &e" + code.getGlobalUses() + "&7/&e" + code.getMaxGlobalUses()));
+            msg.sendRaw(sender, "info-global-uses", MessageManager.placeholders(
+                    "current", String.valueOf(code.getGlobalUses()),
+                    "max", String.valueOf(code.getMaxGlobalUses())
+            ));
         }
 
         if (code.isPlayerUnlimited()) {
-            sender.sendMessage(msg.colorize("&7Max użyć na gracza: &a∞"));
+            msg.sendRaw(sender, "info-player-uses-unlimited");
         } else {
-            sender.sendMessage(msg.colorize("&7Max użyć na gracza: &e" + code.getMaxPlayerUses()));
+            msg.sendRaw(sender, "info-player-uses", MessageManager.placeholders(
+                    "max", String.valueOf(code.getMaxPlayerUses())
+            ));
         }
 
-        sender.sendMessage(msg.colorize("&7Typ nagrody: &e" + code.getRewardType().name()));
-        sender.sendMessage(msg.colorize("&7Nagroda: &e" + code.getRewardDisplay()));
+        msg.sendRaw(sender, "info-reward-type", MessageManager.placeholders(
+                "type", code.getRewardType().name()
+        ));
+        msg.sendRaw(sender, "info-reward", MessageManager.placeholders(
+                "reward", code.getRewardDisplay()
+        ));
 
         return true;
     }
@@ -416,31 +436,31 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        sender.sendMessage(msg.colorize("&6&m─────&r &6Pomoc - Kody &6&m─────"));
-        sender.sendMessage(msg.colorize("&e/kod <nazwa> &7- Wykorzystaj kod"));
-        sender.sendMessage(msg.colorize("&e/kod pomoc &7- Wyświetla tę pomoc"));
+        msg.sendRaw(sender, "help-player-header");
+        msg.sendRaw(sender, "help-player-use-code");
+        msg.sendRaw(sender, "help-player-help");
     }
 
     private void sendHelpAdmin(CommandSender sender) {
-        sender.sendMessage(msg.colorize("&6&m─────&r &6Pomoc Admin - Kody &6&m─────"));
-        sender.sendMessage(msg.colorize(""));
-        sender.sendMessage(msg.colorize("&e/kod stworz <nazwa> <globalne> <per_gracz> <nagroda>"));
-        sender.sendMessage(msg.colorize(""));
-        sender.sendMessage(msg.colorize("&7Typy nagród:"));
-        sender.sendMessage(msg.colorize("&7  • &eprzedmiot &7- przedmiot trzymany w ręce"));
-        sender.sendMessage(msg.colorize("&7  • &eprzedmiot:MATERIAL &7- np. przedmiot:DIAMOND"));
-        sender.sendMessage(msg.colorize("&7  • &eprzedmiot:MATERIAL:ilość &7- np. przedmiot:DIAMOND:64"));
-        sender.sendMessage(msg.colorize("&7  • &epermisja:nazwa &7- np. permisja:vip.fly"));
-        sender.sendMessage(msg.colorize("&7  • &eranga:nazwa &7- np. ranga:vip &7(wymaga LuckPerms)"));
-        sender.sendMessage(msg.colorize(""));
-        sender.sendMessage(msg.colorize("&7Użyj &e0 &7dla nielimitowanych użyć"));
-        sender.sendMessage(msg.colorize(""));
-        sender.sendMessage(msg.colorize("&e/kod usun <nazwa> &7- Usuń kod"));
-        sender.sendMessage(msg.colorize("&e/kod lista aktywne &7- Lista aktywnych kodów"));
-        sender.sendMessage(msg.colorize("&e/kod lista zuzyte &7- Lista zużytych kodów"));
-        sender.sendMessage(msg.colorize("&e/kod lista zuzyte wyczysc &7- Wyczyść zużyte kody"));
-        sender.sendMessage(msg.colorize("&e/kod info <nazwa> &7- Szczegóły kodu"));
-        sender.sendMessage(msg.colorize("&e/kod przeladuj &7- Przeładuj konfigurację"));
+        msg.sendRaw(sender, "help-admin-header");
+        sender.sendMessage("");
+        msg.sendRaw(sender, "help-admin-create");
+        sender.sendMessage("");
+        msg.sendRaw(sender, "help-admin-rewards-header");
+        msg.sendRaw(sender, "help-admin-reward-item");
+        msg.sendRaw(sender, "help-admin-reward-item-material");
+        msg.sendRaw(sender, "help-admin-reward-item-amount");
+        msg.sendRaw(sender, "help-admin-reward-permission");
+        msg.sendRaw(sender, "help-admin-reward-rank");
+        sender.sendMessage("");
+        msg.sendRaw(sender, "help-admin-unlimited-hint");
+        sender.sendMessage("");
+        msg.sendRaw(sender, "help-admin-delete");
+        msg.sendRaw(sender, "help-admin-list-active");
+        msg.sendRaw(sender, "help-admin-list-used");
+        msg.sendRaw(sender, "help-admin-list-clear");
+        msg.sendRaw(sender, "help-admin-info");
+        msg.sendRaw(sender, "help-admin-reload");
     }
 
     @Override

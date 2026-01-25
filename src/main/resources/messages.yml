@@ -29,9 +29,62 @@ must-hold-item: "&cMusisz trzymać przedmiot w ręce!"
 invalid-reward-type: "&cNieprawidłowy typ nagrody!"
 rank-requires-luckperms: "&cNadawanie rang wymaga zainstalowanego LuckPerms!"
 rank-not-found: "&cRanga &e{reward} &cnie istnieje w LuckPerms!"
+unknown-material: "&cNieznany przedmiot: &e{material}"
+unknown-material-hint: "&7Użyj nazwy jak: DIAMOND, IRON_INGOT, GOLDEN_APPLE"
 
-# Zużyte kody
-used-codes-cleared: "&aLista zużytych kodów została wyczyszczona!"
+# Lista
+list-usage-header: "&cPoprawne użycie:"
+list-usage-active: "&e/kod lista aktywne &7- Lista aktywnych kodów"
+list-usage-used: "&e/kod lista zuzyte &7- Lista zużytych kodów"
+list-usage-clear: "&e/kod lista zuzyte wyczysc &7- Wyczyść zużyte kody"
+list-unknown-type: "&cNieznany typ listy: &e{type}"
+list-available-types: "&7Dostępne: &eaktywne&7, &ezuzyte"
+
+# Lista aktywnych kodów
+list-active-header: "&6&m─────&r &6Lista aktywnych kodów &6&m─────"
+list-active-empty: "&7Brak aktywnych kodów."
+list-active-entry: "&7• &e{code} &7(Pozostało: &a{uses}&7)"
+list-active-entry-unlimited: "&7• &e{code} &7(&a∞ nielimitowane&7)"
+
+# Lista zużytych kodów
+list-used-header: "&6&m─────&r &6Lista zużytych kodów &6&m─────"
+list-used-empty: "&7Brak zużytych kodów."
+list-used-entry: "&7• &e{code} &7| &a{uses}x &7| {reward}"
+list-used-clear-hint: "&7Wpisz &e/kod lista zuzyte wyczysc &7aby wyczyścić listę"
+list-used-cleared: "&aLista zużytych kodów została wyczyszczona!"
+list-used-nothing-to-clear: "&7Brak zużytych kodów do wyczyszczenia."
+
+# Info o kodzie
+info-header: "&6&m─────&r &6Kod: {code} &6&m─────"
+info-global-uses: "&7Użycia globalne: &e{current}&7/&e{max}"
+info-global-uses-unlimited: "&7Użycia globalne: &e{current}&7/&a∞"
+info-player-uses: "&7Max użyć na gracza: &e{max}"
+info-player-uses-unlimited: "&7Max użyć na gracza: &a∞"
+info-reward-type: "&7Typ nagrody: &e{type}"
+info-reward: "&7Nagroda: &e{reward}"
+info-usage: "&cPoprawne użycie: /kod info <nazwa>"
+
+# Pomoc gracza
+help-player-header: "&6&m─────&r &6Pomoc - Kody &6&m─────"
+help-player-use-code: "&e/kod <nazwa> &7- Wykorzystaj kod"
+help-player-help: "&e/kod pomoc &7- Wyświetla tę pomoc"
+
+# Pomoc admina
+help-admin-header: "&6&m─────&r &6Pomoc Admin - Kody &6&m─────"
+help-admin-create: "&e/kod stworz <nazwa> <użycia_ogólne> <użycia_gracza> <nagroda>"
+help-admin-rewards-header: "&7Typy nagród:"
+help-admin-reward-item: "&7  • &eprzedmiot &7- przedmiot trzymany w ręce"
+help-admin-reward-item-material: "&7  • &eprzedmiot:MATERIAL &7- np. przedmiot:DIAMOND"
+help-admin-reward-item-amount: "&7  • &eprzedmiot:MATERIAL:ilość &7- np. przedmiot:DIAMOND:64"
+help-admin-reward-permission: "&7  • &epermisja:nazwa &7- np. permisja:vip.fly"
+help-admin-reward-rank: "&7  • &eranga:nazwa &7- np. ranga:vip &7(wymaga LuckPerms)"
+help-admin-unlimited-hint: "&7Użyj &e0 &7dla nielimitowanych użyć"
+help-admin-delete: "&e/kod usun <nazwa> &7- Usuń kod"
+help-admin-list-active: "&e/kod lista aktywne &7- Lista aktywnych kodów"
+help-admin-list-used: "&e/kod lista zuzyte &7- Lista zużytych kodów"
+help-admin-list-clear: "&e/kod lista zuzyte wyczysc &7- Wyczyść zużyte kody"
+help-admin-info: "&e/kod info <nazwa> &7- Szczegóły kodu"
+help-admin-reload: "&e/kod przeladuj &7- Przeładuj konfigurację"
 
 # Reload
 reload-success: "&aPlugin został przeładowany!"
