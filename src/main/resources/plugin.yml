@@ -1,5 +1,5 @@
 name: Kody
-version: '1.0.0'
+version: '${version}'
 main: dev.nxms.codes.Codes
 api-version: '1.21'
 author: nxmsdev

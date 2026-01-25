@@ -3,9 +3,11 @@ package dev.nxms.codes.managers;
 import dev.nxms.codes.Codes;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.util.HashMap;
@@ -29,11 +31,16 @@ public class MessageManager {
             plugin.saveResource("messages.yml", false);
         }
         messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
-        prefix = messagesConfig.getString("prefix", "&8[&6Codes&8] ");
+        prefix = messagesConfig.getString("prefix", "&8[&6Kody&8] ");
     }
 
     public String getRaw(String key) {
-        return messagesConfig.getString(key, "&cMissing message: " + key);
+        String message = messagesConfig.getString(key);
+        if (message == null) {
+            plugin.getLogger().warning("Brak wiadomości w messages.yml: " + key);
+            return "&c[Brak: " + key + "]";
+        }
+        return message;
     }
 
     public String get(String key) {
@@ -74,6 +81,42 @@ public class MessageManager {
             message = message.replace("{" + entry.getKey() + "}", entry.getValue());
         }
         sender.sendMessage(colorize(message));
+    }
+
+    /** Broadcast z prefixem */
+    public void broadcast(String key) {
+        Component c = colorize(prefix + getRaw(key));
+        broadcastComponent(c);
+    }
+
+    /** Broadcast z prefixem + placeholderami */
+    public void broadcast(String key, Map<String, String> placeholders) {
+        String message = prefix + getRaw(key);
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
+        }
+        broadcastComponent(colorize(message));
+    }
+
+    /** Broadcast bez prefixu */
+    public void broadcastRaw(String key) {
+        broadcastComponent(colorize(getRaw(key)));
+    }
+
+    /** Broadcast bez prefixu + placeholdery */
+    public void broadcastRaw(String key, Map<String, String> placeholders) {
+        String message = getRaw(key);
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
+        }
+        broadcastComponent(colorize(message));
+    }
+
+    private void broadcastComponent(Component component) {
+        Bukkit.getConsoleSender().sendMessage(component);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(component);
+        }
     }
 
     public Component colorize(String text) {

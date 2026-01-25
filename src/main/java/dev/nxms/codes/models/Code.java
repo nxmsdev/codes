@@ -20,31 +20,39 @@ public class Code {
     private int globalUses;
     private final int maxGlobalUses;
     private final int maxPlayerUses;
+    private final int cooldown;
+    private final boolean broadcast;
     private final RewardType rewardType;
     private final ItemStack itemReward;
     private final String permissionReward;
     private final String rankReward;
     private final Map<UUID, Integer> playerUses;
+    private final Map<UUID, Long> playerCooldowns;
 
     // Konstruktor dla ITEM
-    public Code(String name, int maxGlobalUses, int maxPlayerUses, ItemStack itemReward) {
+    public Code(String name, int maxGlobalUses, int maxPlayerUses, int cooldown, boolean broadcast, ItemStack itemReward) {
         this.name = name;
         this.globalUses = 0;
         this.maxGlobalUses = maxGlobalUses;
         this.maxPlayerUses = maxPlayerUses;
+        this.cooldown = cooldown;
+        this.broadcast = broadcast;
         this.rewardType = RewardType.ITEM;
         this.itemReward = itemReward.clone();
         this.permissionReward = null;
         this.rankReward = null;
         this.playerUses = new HashMap<>();
+        this.playerCooldowns = new HashMap<>();
     }
 
     // Konstruktor dla PERMISSION lub RANK
-    public Code(String name, int maxGlobalUses, int maxPlayerUses, String reward, RewardType type) {
+    public Code(String name, int maxGlobalUses, int maxPlayerUses, int cooldown, boolean broadcast, String reward, RewardType type) {
         this.name = name;
         this.globalUses = 0;
         this.maxGlobalUses = maxGlobalUses;
         this.maxPlayerUses = maxPlayerUses;
+        this.cooldown = cooldown;
+        this.broadcast = broadcast;
         this.rewardType = type;
         this.itemReward = null;
 
@@ -60,21 +68,25 @@ public class Code {
         }
 
         this.playerUses = new HashMap<>();
+        this.playerCooldowns = new HashMap<>();
     }
 
     // Konstruktor do ładowania z pliku
-    public Code(String name, int globalUses, int maxGlobalUses, int maxPlayerUses,
+    public Code(String name, int globalUses, int maxGlobalUses, int maxPlayerUses, int cooldown, boolean broadcast,
                 RewardType rewardType, ItemStack itemReward, String permissionReward,
-                String rankReward, Map<UUID, Integer> playerUses) {
+                String rankReward, Map<UUID, Integer> playerUses, Map<UUID, Long> playerCooldowns) {
         this.name = name;
         this.globalUses = globalUses;
         this.maxGlobalUses = maxGlobalUses;
         this.maxPlayerUses = maxPlayerUses;
+        this.cooldown = cooldown;
+        this.broadcast = broadcast;
         this.rewardType = rewardType;
         this.itemReward = itemReward;
         this.permissionReward = permissionReward;
         this.rankReward = rankReward;
         this.playerUses = new HashMap<>(playerUses);
+        this.playerCooldowns = new HashMap<>(playerCooldowns);
     }
 
     public String getName() {
@@ -91,6 +103,18 @@ public class Code {
 
     public int getMaxPlayerUses() {
         return maxPlayerUses;
+    }
+
+    public int getCooldown() {
+        return cooldown;
+    }
+
+    public boolean hasCooldown() {
+        return cooldown > 0;
+    }
+
+    public boolean isBroadcast() {
+        return broadcast;
     }
 
     public boolean isGlobalUnlimited() {
@@ -135,6 +159,10 @@ public class Code {
         return new HashMap<>(playerUses);
     }
 
+    public Map<UUID, Long> getPlayerCooldowns() {
+        return new HashMap<>(playerCooldowns);
+    }
+
     public int getPlayerUseCount(UUID playerUuid) {
         return playerUses.getOrDefault(playerUuid, 0);
     }
@@ -153,9 +181,34 @@ public class Code {
         return getPlayerUseCount(playerUuid) < maxPlayerUses;
     }
 
+    public int getRemainingCooldown(UUID playerUuid) {
+        if (!hasCooldown()) {
+            return 0;
+        }
+
+        Long lastUse = playerCooldowns.get(playerUuid);
+        if (lastUse == null) {
+            return 0;
+        }
+
+        long currentTime = System.currentTimeMillis();
+        long elapsedSeconds = (currentTime - lastUse) / 1000;
+        int remaining = (int) (cooldown - elapsedSeconds);
+
+        return Math.max(0, remaining);
+    }
+
+    public boolean isOnCooldown(UUID playerUuid) {
+        return getRemainingCooldown(playerUuid) > 0;
+    }
+
     public void use(UUID playerUuid) {
         globalUses++;
         playerUses.merge(playerUuid, 1, Integer::sum);
+
+        if (hasCooldown()) {
+            playerCooldowns.put(playerUuid, System.currentTimeMillis());
+        }
     }
 
     public String getRewardDisplay() {
@@ -192,5 +245,16 @@ public class Code {
             return "∞";
         }
         return String.valueOf(getRemainingGlobalUses());
+    }
+
+    public String getCooldownDisplay() {
+        if (!hasCooldown()) {
+            return "Brak";
+        }
+        return cooldown + "s";
+    }
+
+    public String getBroadcastDisplay() {
+        return broadcast ? "Tak" : "Nie";
     }
 }

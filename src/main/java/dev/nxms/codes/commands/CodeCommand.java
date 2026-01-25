@@ -4,6 +4,8 @@ import dev.nxms.codes.Codes;
 import dev.nxms.codes.managers.CodeManager;
 import dev.nxms.codes.managers.MessageManager;
 import dev.nxms.codes.models.Code;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -93,7 +95,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (args.length < 5) {
+        if (args.length < 7) {
             msg.send(sender, "invalid-usage-create");
             msg.send(sender, "invalid-usage-create-hint");
             return true;
@@ -102,21 +104,34 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         String codeName = args[1];
         int maxGlobalUses;
         int maxPlayerUses;
+        int cooldown;
+        boolean broadcast;
 
         try {
             maxGlobalUses = Integer.parseInt(args[2]);
             maxPlayerUses = Integer.parseInt(args[3]);
+            cooldown = Integer.parseInt(args[4]);
         } catch (NumberFormatException e) {
             msg.send(sender, "invalid-number");
             return true;
         }
 
-        if (maxGlobalUses < 0 || maxPlayerUses < 0) {
+        if (maxGlobalUses < 0 || maxPlayerUses < 0 || cooldown < 0) {
             msg.send(sender, "invalid-number-negative");
             return true;
         }
 
-        String rewardArg = args[4];
+        String broadcastArg = args[5].toLowerCase();
+        if (broadcastArg.equals("true") || broadcastArg.equals("tak")) {
+            broadcast = true;
+        } else if (broadcastArg.equals("false") || broadcastArg.equals("nie")) {
+            broadcast = false;
+        } else {
+            msg.send(sender, "invalid-broadcast");
+            return true;
+        }
+
+        String rewardArg = args[6];
         boolean success;
 
         if (rewardArg.equalsIgnoreCase("przedmiot")) {
@@ -131,7 +146,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            success = codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, heldItem.clone());
+            success = codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, cooldown, broadcast, heldItem.clone());
         }
         else if (rewardArg.toLowerCase().startsWith("przedmiot:")) {
             String rewardData = rewardArg.substring(10);
@@ -155,8 +170,8 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
 
             Material material = Material.matchMaterial(materialName);
             if (material == null) {
-                msg.send(sender, "unknown-material", MessageManager.placeholders("material", materialName));
-                msg.send(sender, "unknown-material-hint");
+                msg.send(sender, "unknown-item", MessageManager.placeholders("item", materialName));
+                msg.send(sender, "unknown-item-hint");
                 return true;
             }
 
@@ -164,7 +179,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             if (amount > 64) amount = 64;
 
             ItemStack itemReward = new ItemStack(material, amount);
-            success = codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, itemReward);
+            success = codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, cooldown, broadcast, itemReward);
         }
         else if (rewardArg.toLowerCase().startsWith("permisja:")) {
             String permission = rewardArg.substring(9);
@@ -172,7 +187,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 msg.send(sender, "invalid-reward-type");
                 return true;
             }
-            success = codeManager.createCodeWithPermission(codeName, maxGlobalUses, maxPlayerUses, permission);
+            success = codeManager.createCodeWithPermission(codeName, maxGlobalUses, maxPlayerUses, cooldown, broadcast, permission);
         }
         else if (rewardArg.toLowerCase().startsWith("ranga:")) {
             String rank = rewardArg.substring(6);
@@ -191,7 +206,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            success = codeManager.createCodeWithRank(codeName, maxGlobalUses, maxPlayerUses, rank);
+            success = codeManager.createCodeWithRank(codeName, maxGlobalUses, maxPlayerUses, cooldown, broadcast, rank);
         }
         else {
             msg.send(sender, "invalid-reward-type");
@@ -206,6 +221,14 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             }
             if (maxPlayerUses == Code.UNLIMITED) {
                 msg.send(sender, "code-created-unlimited-player");
+            }
+            if (cooldown > 0) {
+                msg.send(sender, "code-created-cooldown", MessageManager.placeholders("seconds", String.valueOf(cooldown)));
+            }
+            if (broadcast) {
+                msg.send(sender, "code-created-broadcast-on");
+            } else {
+                msg.send(sender, "code-created-broadcast-off");
             }
         } else {
             msg.send(sender, "code-already-exists", MessageManager.placeholders("code", codeName));
@@ -292,7 +315,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             if (codeManager.clearUsedCodes()) {
                 msg.send(sender, "list-used-cleared");
             } else {
-                msg.sendRaw(sender, "list-used-nothing-to-clear");
+                msg.sendRaw(sender, "list-used-clear-empty");
             }
             return true;
         }
@@ -354,6 +377,14 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             ));
         }
 
+        msg.sendRaw(sender, "info-cooldown", MessageManager.placeholders(
+                "cooldown", code.getCooldownDisplay()
+        ));
+
+        msg.sendRaw(sender, "info-broadcast", MessageManager.placeholders(
+                "broadcast", code.getBroadcastDisplay()
+        ));
+
         msg.sendRaw(sender, "info-reward-type", MessageManager.placeholders(
                 "type", code.getRewardType().name()
         ));
@@ -393,6 +424,14 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (code.isOnCooldown(player.getUniqueId())) {
+            int remaining = code.getRemainingCooldown(player.getUniqueId());
+            msg.send(sender, "code-cooldown", MessageManager.placeholders(
+                    "seconds", String.valueOf(remaining)
+            ));
+            return true;
+        }
+
         if (!code.canBeUsed()) {
             msg.send(sender, "code-expired");
             return true;
@@ -409,25 +448,83 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             case SUCCESS_ITEM:
                 msg.send(player, "code-redeemed", MessageManager.placeholders("code", code.getName()));
                 msg.send(player, "reward-received-item");
+
+                if (code.isBroadcast()) {
+                    String rewardDisplay = getItemDisplayName(code.getItemReward());
+                    msg.broadcast("broadcast-reward-item", MessageManager.placeholders(
+                            "player", player.getName(),
+                            "reward", rewardDisplay
+                    ));
+                }
                 break;
+
             case SUCCESS_PERMISSION:
                 msg.send(player, "code-redeemed", MessageManager.placeholders("code", code.getName()));
                 msg.send(player, "reward-received-permission",
                         MessageManager.placeholders("reward", code.getPermissionReward()));
+
+                if (code.isBroadcast()) {
+                    msg.broadcast("broadcast-reward-permission", MessageManager.placeholders(
+                            "player", player.getName(),
+                            "reward", code.getPermissionReward()
+                    ));
+                }
                 break;
+
             case SUCCESS_RANK:
                 msg.send(player, "code-redeemed", MessageManager.placeholders("code", code.getName()));
                 msg.send(player, "reward-received-rank",
                         MessageManager.placeholders("reward", code.getRankReward()));
+
+                if (code.isBroadcast()) {
+                    msg.broadcast("broadcast-reward-rank", MessageManager.placeholders(
+                            "player", player.getName(),
+                            "reward", code.getRankReward()
+                    ));
+                }
                 break;
+
             case RANK_ERROR:
                 msg.send(player, "rank-requires-luckperms");
                 break;
+
             default:
                 msg.send(player, "code-not-found", MessageManager.placeholders("code", codeName));
         }
 
         return true;
+    }
+
+    private String getItemDisplayName(ItemStack item) {
+        if (item == null) {
+            return "Przedmiot";
+        }
+
+        int amount = item.getAmount();
+
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            Component displayName = item.getItemMeta().displayName();
+            if (displayName != null) {
+                String name = PlainTextComponentSerializer.plainText().serialize(displayName);
+                return name + " x" + amount;
+            }
+        }
+
+        String materialName = item.getType().name()
+                .toLowerCase()
+                .replace("_", " ");
+
+        String[] words = materialName.split(" ");
+        StringBuilder formatted = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                formatted.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1))
+                        .append(" ");
+            }
+        }
+
+        return formatted.toString().trim() + " x" + amount;
     }
 
     private void sendHelpPlayer(CommandSender sender) {
@@ -437,7 +534,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         }
 
         msg.sendRaw(sender, "help-player-header");
-        msg.sendRaw(sender, "help-player-use-code");
+        msg.sendRaw(sender, "help-player-use");
         msg.sendRaw(sender, "help-player-help");
     }
 
@@ -454,6 +551,8 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         msg.sendRaw(sender, "help-admin-reward-rank");
         sender.sendMessage("");
         msg.sendRaw(sender, "help-admin-unlimited-hint");
+        msg.sendRaw(sender, "help-admin-cooldown-hint");
+        msg.sendRaw(sender, "help-admin-broadcast-hint");
         sender.sendMessage("");
         msg.sendRaw(sender, "help-admin-delete");
         msg.sendRaw(sender, "help-admin-list-active");
@@ -512,14 +611,21 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 completions.add("wyczysc");
             }
             else if (sub.equals("stworz") && sender.hasPermission("codes.admin")) {
-                completions.add("<użycia_globalne>");
+                completions.add("<użycia_ogólne>");
             }
         }
         else if (args.length == 4 && args[0].equalsIgnoreCase("stworz") && sender.hasPermission("codes.admin")) {
             completions.add("<użycia_gracza>");
         }
         else if (args.length == 5 && args[0].equalsIgnoreCase("stworz") && sender.hasPermission("codes.admin")) {
-            String currentArg = args[4].toLowerCase();
+            completions.add("<opóźnienie_sekundy>");
+        }
+        else if (args.length == 6 && args[0].equalsIgnoreCase("stworz") && sender.hasPermission("codes.admin")) {
+            completions.add("tak");
+            completions.add("nie");
+        }
+        else if (args.length == 7 && args[0].equalsIgnoreCase("stworz") && sender.hasPermission("codes.admin")) {
+            String currentArg = args[6].toLowerCase();
 
             if (currentArg.isEmpty() || "przedmiot".startsWith(currentArg)) {
                 completions.add("przedmiot");

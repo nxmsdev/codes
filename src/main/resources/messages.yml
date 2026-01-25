@@ -1,4 +1,4 @@
-# Wiadomości pluginu Codes
+# Wiadomości pluginu Kody
 # Użyj & dla kolorów
 
 prefix: "&8[&6Kody&8] "
@@ -7,32 +7,50 @@ prefix: "&8[&6Kody&8] "
 code-created: "&aKod &e{code} &azostał pomyślnie utworzony!"
 code-created-unlimited-global: "&7(Nielimitowane użycia globalne)"
 code-created-unlimited-player: "&7(Nielimitowane użycia na gracza)"
+code-created-cooldown: "&7(Opóźnienie: &e{seconds}s&7)"
+code-created-broadcast-on: "&7(Ogłoszenie: &aTak&7)"
+code-created-broadcast-off: "&7(Ogłoszenie: &cNie&7)"
+
 code-deleted: "&aKod &e{code} &azostał usunięty!"
-code-redeemed: "&aPomyślnie wykorzystałeś kod &e{code}&a!"
+code-redeemed: "&aPomyślnie wykorzystałeś kod!"
 reward-received-item: "&aOtrzymałeś przedmiot jako nagrodę!"
 reward-received-permission: "&aOtrzymałeś permisję: &e{reward}"
 reward-received-rank: "&aOtrzymałeś rangę: &e{reward}"
 
+# Ogłoszenia globalne (nie pokazują kodu!)
+broadcast-reward-item: "&6{player} &eotrzymał przedmiot: &a{reward}"
+broadcast-reward-permission: "&6{player} &eotrzymał permisję: &a{reward}"
+broadcast-reward-rank: "&6{player} &eotrzymał rangę: &a{reward}"
+
 # Wiadomości błędów
 no-permission: "&cNie masz uprawnień do wykonania tej komendy!"
+must-be-player: "&cTa komenda może być wykonana tylko przez gracza!"
+invalid-number: "&cPodana wartość musi być liczbą (0 lub więcej)!"
+invalid-number-negative: "&cLiczba nie może być ujemna!"
+
 code-not-found: "&cKod &e{code} &cnie istnieje!"
 code-already-exists: "&cKod &e{code} &cjuż istnieje!"
 code-expired: "&cTen kod wygasł (wykorzystano wszystkie użycia)!"
 code-already-used: "&cJuż wykorzystałeś ten kod maksymalną liczbę razy!"
-invalid-usage-create: "&cPoprawne użycie: &e/kod stworz <nazwa> <użycia_ogólne> <użycia_gracza> <nagroda>"
-invalid-usage-create-hint: "&7Nagroda: &eprzedmiot &7| &eprzedmiot:MATERIAL:ilość &7| &epermisja:nazwa &7| &eranga:nazwa"
-invalid-usage-delete: "&cPoprawne użycie: &e/kod usun <nazwa>"
-invalid-number: "&cPodana wartość musi być liczbą (0 lub więcej)!"
-invalid-number-negative: "&cLiczba nie może być ujemna!"
-must-be-player: "&cTa komenda może być wykonana tylko przez gracza!"
+code-cooldown: "&cMusisz poczekać &e{seconds} &csekund przed ponownym użyciem tego kodu!"
+
 must-hold-item: "&cMusisz trzymać przedmiot w ręce!"
 invalid-reward-type: "&cNieprawidłowy typ nagrody!"
+invalid-broadcast: "&cOgłoszenie musi być: &etak &club &enie"
+
 rank-requires-luckperms: "&cNadawanie rang wymaga zainstalowanego LuckPerms!"
 rank-not-found: "&cRanga &e{reward} &cnie istnieje w LuckPerms!"
-unknown-material: "&cNieznany przedmiot: &e{material}"
-unknown-material-hint: "&7Użyj nazwy jak: DIAMOND, IRON_INGOT, GOLDEN_APPLE"
 
-# Lista
+unknown-item: "&cNieznany przedmiot: &e{item}"
+unknown-item-hint: "&7Użyj nazwy jak: DIAMOND, IRON_INGOT, GOLDEN_APPLE"
+
+# Użycie komend
+invalid-usage-create: "&cPoprawne użycie: &e/kod stworz <nazwa> <użycia_ogólne> <użycia_gracza> <opóźnienie> <ogłoszenie> <nagroda>"
+invalid-usage-create-hint: "&7Nagroda: &eprzedmiot &7| &eprzedmiot:MATERIAL:ilość &7| &epermisja:nazwa &7| &eranga:nazwa"
+invalid-usage-delete: "&cPoprawne użycie: &e/kod usun <nazwa>"
+info-usage: "&cPoprawne użycie: &e/kod info <nazwa>"
+
+# Lista komend (/kod lista)
 list-usage-header: "&cPoprawne użycie:"
 list-usage-active: "&e/kod lista aktywne &7- Lista aktywnych kodów"
 list-usage-used: "&e/kod lista zuzyte &7- Lista zużytych kodów"
@@ -52,7 +70,7 @@ list-used-empty: "&7Brak zużytych kodów."
 list-used-entry: "&7• &e{code} &7| &a{uses}x &7| {reward}"
 list-used-clear-hint: "&7Wpisz &e/kod lista zuzyte wyczysc &7aby wyczyścić listę"
 list-used-cleared: "&aLista zużytych kodów została wyczyszczona!"
-list-used-nothing-to-clear: "&7Brak zużytych kodów do wyczyszczenia."
+list-used-clear-empty: "&7Brak zużytych kodów do wyczyszczenia."
 
 # Info o kodzie
 info-header: "&6&m─────&r &6Kod: {code} &6&m─────"
@@ -60,18 +78,19 @@ info-global-uses: "&7Użycia globalne: &e{current}&7/&e{max}"
 info-global-uses-unlimited: "&7Użycia globalne: &e{current}&7/&a∞"
 info-player-uses: "&7Max użyć na gracza: &e{max}"
 info-player-uses-unlimited: "&7Max użyć na gracza: &a∞"
+info-cooldown: "&7Opóźnienie: &e{cooldown}"
+info-broadcast: "&7Ogłoszenie: &e{broadcast}"
 info-reward-type: "&7Typ nagrody: &e{type}"
 info-reward: "&7Nagroda: &e{reward}"
-info-usage: "&cPoprawne użycie: /kod info <nazwa>"
 
 # Pomoc gracza
 help-player-header: "&6&m─────&r &6Pomoc - Kody &6&m─────"
-help-player-use-code: "&e/kod <nazwa> &7- Wykorzystaj kod"
+help-player-use: "&e/kod <nazwa> &7- Wykorzystaj kod"
 help-player-help: "&e/kod pomoc &7- Wyświetla tę pomoc"
 
 # Pomoc admina
 help-admin-header: "&6&m─────&r &6Pomoc Admin - Kody &6&m─────"
-help-admin-create: "&e/kod stworz <nazwa> <użycia_ogólne> <użycia_gracza> <nagroda>"
+help-admin-create: "&e/kod stworz <nazwa> <użycia_ogólne> <użycia_gracza> <opóźnienie> <ogłoszenie> <nagroda>"
 help-admin-rewards-header: "&7Typy nagród:"
 help-admin-reward-item: "&7  • &eprzedmiot &7- przedmiot trzymany w ręce"
 help-admin-reward-item-material: "&7  • &eprzedmiot:MATERIAL &7- np. przedmiot:DIAMOND"
@@ -79,6 +98,8 @@ help-admin-reward-item-amount: "&7  • &eprzedmiot:MATERIAL:ilość &7- np. prz
 help-admin-reward-permission: "&7  • &epermisja:nazwa &7- np. permisja:vip.fly"
 help-admin-reward-rank: "&7  • &eranga:nazwa &7- np. ranga:vip &7(wymaga LuckPerms)"
 help-admin-unlimited-hint: "&7Użyj &e0 &7dla nielimitowanych użyć"
+help-admin-cooldown-hint: "&7Użyj &e0 &7dla braku opóźnienia (w sekundach)"
+help-admin-broadcast-hint: "&7Ogłoszenie: &etak &7lub &enie &7(czy pokazać na czacie globalnym)"
 help-admin-delete: "&e/kod usun <nazwa> &7- Usuń kod"
 help-admin-list-active: "&e/kod lista aktywne &7- Lista aktywnych kodów"
 help-admin-list-used: "&e/kod lista zuzyte &7- Lista zużytych kodów"

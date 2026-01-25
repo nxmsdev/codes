@@ -62,6 +62,8 @@ public class CodeManager {
                 int globalUses = codeSection.getInt("global-uses", 0);
                 int maxGlobalUses = codeSection.getInt("max-global-uses", 100);
                 int maxPlayerUses = codeSection.getInt("max-player-uses", 1);
+                int cooldown = codeSection.getInt("cooldown", 0);
+                boolean broadcast = codeSection.getBoolean("broadcast", true);
                 String rewardTypeStr = codeSection.getString("reward-type", "ITEM");
                 Code.RewardType rewardType = Code.RewardType.valueOf(rewardTypeStr);
 
@@ -90,8 +92,21 @@ public class CodeManager {
                     }
                 }
 
-                Code code = new Code(codeName, globalUses, maxGlobalUses, maxPlayerUses,
-                        rewardType, itemReward, permissionReward, rankReward, playerUses);
+                Map<UUID, Long> playerCooldowns = new HashMap<>();
+                ConfigurationSection cooldownsSection = codeSection.getConfigurationSection("player-cooldowns");
+                if (cooldownsSection != null) {
+                    for (String uuidStr : cooldownsSection.getKeys(false)) {
+                        try {
+                            UUID uuid = UUID.fromString(uuidStr);
+                            long lastUse = cooldownsSection.getLong(uuidStr);
+                            playerCooldowns.put(uuid, lastUse);
+                        } catch (IllegalArgumentException ignored) {
+                        }
+                    }
+                }
+
+                Code code = new Code(codeName, globalUses, maxGlobalUses, maxPlayerUses, cooldown, broadcast,
+                        rewardType, itemReward, permissionReward, rankReward, playerUses, playerCooldowns);
                 codes.put(codeName.toLowerCase(), code);
 
             } catch (Exception e) {
@@ -131,6 +146,8 @@ public class CodeManager {
             codesConfig.set(path + ".global-uses", code.getGlobalUses());
             codesConfig.set(path + ".max-global-uses", code.getMaxGlobalUses());
             codesConfig.set(path + ".max-player-uses", code.getMaxPlayerUses());
+            codesConfig.set(path + ".cooldown", code.getCooldown());
+            codesConfig.set(path + ".broadcast", code.isBroadcast());
             codesConfig.set(path + ".reward-type", code.getRewardType().name());
 
             if (code.getRewardType() == Code.RewardType.ITEM) {
@@ -143,6 +160,10 @@ public class CodeManager {
 
             for (Map.Entry<UUID, Integer> entry : code.getPlayerUses().entrySet()) {
                 codesConfig.set(path + ".player-uses." + entry.getKey().toString(), entry.getValue());
+            }
+
+            for (Map.Entry<UUID, Long> entry : code.getPlayerCooldowns().entrySet()) {
+                codesConfig.set(path + ".player-cooldowns." + entry.getKey().toString(), entry.getValue());
             }
         }
 
@@ -160,34 +181,34 @@ public class CodeManager {
         }
     }
 
-    public boolean createCode(String name, int maxGlobalUses, int maxPlayerUses, ItemStack itemReward) {
+    public boolean createCode(String name, int maxGlobalUses, int maxPlayerUses, int cooldown, boolean broadcast, ItemStack itemReward) {
         if (codes.containsKey(name.toLowerCase())) {
             return false;
         }
 
-        Code code = new Code(name, maxGlobalUses, maxPlayerUses, itemReward);
+        Code code = new Code(name, maxGlobalUses, maxPlayerUses, cooldown, broadcast, itemReward);
         codes.put(name.toLowerCase(), code);
         saveCodes();
         return true;
     }
 
-    public boolean createCodeWithPermission(String name, int maxGlobalUses, int maxPlayerUses, String permission) {
+    public boolean createCodeWithPermission(String name, int maxGlobalUses, int maxPlayerUses, int cooldown, boolean broadcast, String permission) {
         if (codes.containsKey(name.toLowerCase())) {
             return false;
         }
 
-        Code code = new Code(name, maxGlobalUses, maxPlayerUses, permission, Code.RewardType.PERMISSION);
+        Code code = new Code(name, maxGlobalUses, maxPlayerUses, cooldown, broadcast, permission, Code.RewardType.PERMISSION);
         codes.put(name.toLowerCase(), code);
         saveCodes();
         return true;
     }
 
-    public boolean createCodeWithRank(String name, int maxGlobalUses, int maxPlayerUses, String rank) {
+    public boolean createCodeWithRank(String name, int maxGlobalUses, int maxPlayerUses, int cooldown, boolean broadcast, String rank) {
         if (codes.containsKey(name.toLowerCase())) {
             return false;
         }
 
-        Code code = new Code(name, maxGlobalUses, maxPlayerUses, rank, Code.RewardType.RANK);
+        Code code = new Code(name, maxGlobalUses, maxPlayerUses, cooldown, broadcast, rank, Code.RewardType.RANK);
         codes.put(name.toLowerCase(), code);
         saveCodes();
         return true;
