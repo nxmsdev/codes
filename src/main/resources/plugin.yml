@@ -17,7 +17,6 @@ permissions:
     default: true
 
 commands:
-  code:
+  kod:
     description: Główna komenda pluginu Codes
-    usage: /<command> [create|delete|code_name]
-    aliases: [kod, kody, codes]
+    usage: /<command> [stworz|usun|lista|info|pomoc]

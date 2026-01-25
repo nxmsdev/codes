@@ -36,7 +36,6 @@ public class Codes extends JavaPlugin {
             getLogger().info("Inicjalizacja CodeManager...");
             this.codeManager = new CodeManager(this);
 
-            // Sprawdź i zainicjalizuj LuckPerms
             initLuckPerms();
 
             registerCommands();
@@ -93,14 +92,14 @@ public class Codes extends JavaPlugin {
     }
 
     private void registerCommands() {
-        PluginCommand codeCommand = getCommand("code");
-        if (codeCommand != null) {
+        PluginCommand kodCommand = getCommand("kod");
+        if (kodCommand != null) {
             CodeCommand executor = new CodeCommand(this);
-            codeCommand.setExecutor(executor);
-            codeCommand.setTabCompleter(executor);
-            getLogger().info("Komenda /code zarejestrowana!");
+            kodCommand.setExecutor(executor);
+            kodCommand.setTabCompleter(executor);
+            getLogger().info("Komenda /kod zarejestrowana!");
         } else {
-            getLogger().severe("Nie można zarejestrować komendy /code!");
+            getLogger().severe("Nie można zarejestrować komendy /kod!");
         }
     }
 
