@@ -1,0 +1,10 @@
+# Konfiguracja pluginu Codes
+# Autor: nxmsdev
+
+# Czy zapisywać dane automatycznie co X minut
+auto-save:
+  enabled: true
+  interval: 5
+
+# Czy włączyć integrację z LuckPerms
+luckperms-integration: true

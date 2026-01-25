@@ -1,0 +1,37 @@
+# Wiadomości pluginu Codes
+# Użyj & dla kolorów
+
+prefix: "&8[&6Kody&8] "
+
+# Wiadomości sukcesu
+code-created: "&aKod &e{code} &azostał pomyślnie utworzony!"
+code-created-unlimited-global: "&7(Nielimitowane użycia globalne)"
+code-created-unlimited-player: "&7(Nielimitowane użycia na gracza)"
+code-deleted: "&aKod &e{code} &azostał usunięty!"
+code-redeemed: "&aPomyślnie wykorzystałeś kod &e{code}&a!"
+reward-received-item: "&aOtrzymałeś przedmiot jako nagrodę!"
+reward-received-permission: "&aOtrzymałeś permisję: &e{reward}"
+reward-received-rank: "&aOtrzymałeś rangę: &e{reward}"
+
+# Wiadomości błędów
+no-permission: "&cNie masz uprawnień do wykonania tej komendy!"
+code-not-found: "&cKod &e{code} &cnie istnieje!"
+code-already-exists: "&cKod &e{code} &cjuż istnieje!"
+code-expired: "&cTen kod wygasł (wykorzystano wszystkie użycia)!"
+code-already-used: "&cJuż wykorzystałeś ten kod maksymalną liczbę razy!"
+invalid-usage-create: "&cPoprawne użycie: &e/kod stworz <nazwa> <użycia_ogólne> <użycia_gracza> <nagroda>"
+invalid-usage-create-hint: "&7Nagroda: &eitem &7| &eitem:MATERIAL:ilość &7| &epermission:nazwa &7| &erank:nazwa"
+invalid-usage-delete: "&cPoprawne użycie: &e/kod usun <nazwa>"
+invalid-number: "&cPodana wartość musi być liczbą (0 lub więcej)!"
+invalid-number-negative: "&cLiczba nie może być ujemna!"
+must-be-player: "&cTa komenda może być wykonana tylko przez gracza!"
+must-hold-item: "&cMusisz trzymać przedmiot w ręce!"
+invalid-reward-type: "&cNieprawidłowy typ nagrody!"
+rank-requires-luckperms: "&cNadawanie rang wymaga zainstalowanego LuckPerms!"
+rank-not-found: "&cRanga &e{reward} &cnie istnieje w LuckPerms!"
+
+# Zużyte kody
+used-codes-cleared: "&aLista zużytych kodów została wyczyszczona!"
+
+# Reload
+reload-success: "&aPlugin został przeładowany!"

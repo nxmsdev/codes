@@ -1,6 +1,23 @@
-name: Kody
-version: '1.0-SNAPSHOT'
-main: dev.nxms.kody.Kody
+name: Codes
+version: '1.0.0'
+main: dev.nxms.codes.Codes
 api-version: '1.21'
-authors: [ nxmsdev ]
-website: nxms.dev
+author: nxmsdev
+description: Plugin do zarządzania kodami promocyjnymi
+
+softdepend:
+  - LuckPerms
+
+permissions:
+  codes.admin:
+    description: Dostęp do komend administracyjnych
+    default: op
+  codes.player:
+    description: Dostęp do używania kodów
+    default: true
+
+commands:
+  code:
+    description: Główna komenda pluginu Codes
+    usage: /<command> [create|delete|code_name]
+    aliases: [kod, kody, codes]
