@@ -1,16 +1,44 @@
-# Compiled class file
-*.class
+# Gradle
+.gradle/
+build/
+!src/**/build/
+!build/libs/*.jar
 
-# Log file
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
 *.log
+logs/
 
-# BlueJ files
-*.ctxt
+# Minecraft/Paper dev
+run/
+build/libs/*-sources.jar
+build/papermc-run/
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# Temp files
+*.tmp
+*.temp
+*.swp
+*~
 
-# Package Files #
+# Dependencies
+libs/
+lib/
+
+# Target (Eclipse)
+target/
+
+# Package Files
 *.jar
 *.war
 *.nar
@@ -19,6 +47,12 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# PaperMC specific
+work/
+cache/
+
+# Compiled classes
+*.class

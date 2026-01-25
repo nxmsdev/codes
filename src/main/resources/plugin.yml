@@ -1,0 +1,6 @@
+name: Kody
+version: '1.0-SNAPSHOT'
+main: dev.nxms.kody.Kody
+api-version: '1.21'
+authors: [ nxmsdev ]
+website: nxms.dev
