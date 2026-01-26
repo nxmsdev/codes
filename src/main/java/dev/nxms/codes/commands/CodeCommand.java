@@ -354,17 +354,25 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        UUID viewer = (sender instanceof Player p) ? p.getUniqueId() : null;
+
         for (Code code : codeManager.getAllCodes()) {
-            if (code.isGlobalUnlimited()) {
-                msg.sendRaw(sender, "list-active-entry-unlimited", MessageManager.placeholders(
-                        "code", code.getName()
-                ));
-            } else {
-                msg.sendRaw(sender, "list-active-entry", MessageManager.placeholders(
-                        "code", code.getName(),
-                        "uses", code.getRemainingGlobalUsesDisplay()
-                ));
+            String gUsed = String.valueOf(code.getGlobalUses());
+            String gMax = code.isGlobalUnlimited() ? "∞" : String.valueOf(code.getMaxGlobalUses());
+
+            String pUsed = "-";
+            String pMax = code.isPlayerUnlimited() ? "∞" : String.valueOf(code.getMaxPlayerUses());
+            if (viewer != null) {
+                pUsed = String.valueOf(code.getPlayerUseCount(viewer));
             }
+
+            msg.sendRaw(sender, "list-active-entry", MessageManager.placeholders(
+                    "code", code.getName(),
+                    "global_used", gUsed,
+                    "global_max", gMax,
+                    "player_used", pUsed,
+                    "player_max", pMax
+            ));
         }
 
         return true;
@@ -392,11 +400,25 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        UUID viewer = (sender instanceof Player p) ? p.getUniqueId() : null;
+
         for (CodeManager.UsedCodeInfo info : used) {
+            String gUsed = String.valueOf(info.totalUses());
+            String gMax = (info.maxGlobalUses() == 0) ? "∞" : String.valueOf(info.maxGlobalUses());
+
+            String pUsed = "-";
+            String pMax = (info.maxPlayerUses() == 0) ? "∞" : String.valueOf(info.maxPlayerUses());
+            if (viewer != null && info.playerUses() != null) {
+                pUsed = String.valueOf(info.playerUses().getOrDefault(viewer, 0));
+            }
+
             msg.sendRaw(sender, "list-used-entry", MessageManager.placeholders(
                     "code", info.name(),
-                    "uses", String.valueOf(info.totalUses()),
-                    "reward", info.rewardDisplay()
+                    "reward", info.rewardDisplay(),
+                    "global_used", gUsed,
+                    "global_max", gMax,
+                    "player_used", pUsed,
+                    "player_max", pMax
             ));
         }
 

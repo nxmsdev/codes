@@ -125,10 +125,23 @@ public class CodeManager {
             if (codeSection == null) continue;
 
             try {
-                String rewardDisplay = codeSection.getString("reward", "Nieznana");
+                String rewardDisplay = codeSection.getString("reward", "Unknown");
                 int totalUses = codeSection.getInt("total-uses", 0);
+                int maxGlobalUses = codeSection.getInt("max-global-uses", 0);
+                int maxPlayerUses = codeSection.getInt("max-player-uses", 0);
 
-                UsedCodeInfo info = new UsedCodeInfo(codeName, rewardDisplay, totalUses);
+                Map<UUID, Integer> playerUses = new HashMap<>();
+                ConfigurationSection pu = codeSection.getConfigurationSection("player-uses");
+                if (pu != null) {
+                    for (String uuidStr : pu.getKeys(false)) {
+                        try {
+                            UUID uuid = UUID.fromString(uuidStr);
+                            playerUses.put(uuid, pu.getInt(uuidStr, 0));
+                        } catch (IllegalArgumentException ignored) {}
+                    }
+                }
+
+                UsedCodeInfo info = new UsedCodeInfo(codeName, rewardDisplay, totalUses, maxGlobalUses, maxPlayerUses, playerUses);
                 usedCodes.put(codeName.toLowerCase(), info);
 
             } catch (Exception e) {
@@ -171,6 +184,14 @@ public class CodeManager {
             String path = "used-codes." + info.name();
             codesConfig.set(path + ".reward", info.rewardDisplay());
             codesConfig.set(path + ".total-uses", info.totalUses());
+            codesConfig.set(path + ".max-global-uses", info.maxGlobalUses());
+            codesConfig.set(path + ".max-player-uses", info.maxPlayerUses());
+
+            if (info.playerUses() != null) {
+                for (Map.Entry<UUID, Integer> e : info.playerUses().entrySet()) {
+                    codesConfig.set(path + ".player-uses." + e.getKey().toString(), e.getValue());
+                }
+            }
         }
 
         try {
@@ -296,7 +317,10 @@ public class CodeManager {
         UsedCodeInfo info = new UsedCodeInfo(
                 code.getName(),
                 code.getRewardDisplay(),
-                code.getGlobalUses()
+                code.getGlobalUses(),
+                code.getMaxGlobalUses(),
+                code.getMaxPlayerUses(),
+                new HashMap<>(code.getPlayerUses())
         );
 
         usedCodes.put(code.getName().toLowerCase(), info);
@@ -334,8 +358,14 @@ public class CodeManager {
         return false;
     }
 
-    public record UsedCodeInfo(String name, String rewardDisplay, int totalUses) {
-    }
+    public record UsedCodeInfo(
+            String name,
+            String rewardDisplay,
+            int totalUses,
+            int maxGlobalUses,
+            int maxPlayerUses,
+            Map<UUID, Integer> playerUses
+    ) { }
 
     public enum RedeemResult {
         SUCCESS_ITEM,
