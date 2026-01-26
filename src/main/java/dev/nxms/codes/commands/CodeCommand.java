@@ -760,7 +760,6 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
-
         if (codeManager == null) return Collections.emptyList();
 
         boolean isAdmin = sender.hasPermission("codes.admin");
@@ -768,7 +767,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
 
         List<String> out = new ArrayList<>();
 
-        boolean pl = label.equalsIgnoreCase("kod"); // /kod = PL, /code = EN
+        boolean pl = label.equals("kod");
 
         // 1 argument
         if (args.length == 1) {
