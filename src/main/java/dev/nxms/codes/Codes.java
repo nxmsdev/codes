@@ -7,11 +7,19 @@ import dev.nxms.codes.managers.MessageManager;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
 public class Codes extends JavaPlugin {
 
     private static Codes instance;
+
     private CodeManager codeManager;
     private MessageManager messageManager;
+
     private LuckPermsHook luckPermsHook;
     private boolean luckPermsEnabled;
 
@@ -19,42 +27,47 @@ public class Codes extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        try {
-            if (!getDataFolder().exists()) {
-                getDataFolder().mkdirs();
-            }
-
-            saveDefaultConfig();
-
-            if (!new java.io.File(getDataFolder(), "messages.yml").exists()) {
-                saveResource("messages.yml", false);
-            }
-
-            getLogger().info("Inicjalizacja MessageManager...");
-            this.messageManager = new MessageManager(this);
-
-            getLogger().info("Inicjalizacja CodeManager...");
-            this.codeManager = new CodeManager(this);
-
-            initLuckPerms();
-
-            registerCommands();
-
-            if (getConfig().getBoolean("auto-save.enabled", true)) {
-                int interval = getConfig().getInt("auto-save.interval", 5) * 60 * 20;
-                getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
-                    if (codeManager != null) {
-                        codeManager.saveCodes();
-                    }
-                }, interval, interval);
-            }
-
-            getLogger().info("Plugin Codes v1.0.0 został włączony!");
-
-        } catch (Exception e) {
-            getLogger().severe("Błąd podczas włączania pluginu!");
-            e.printStackTrace();
+        if (!getDataFolder().exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            getDataFolder().mkdirs();
         }
+
+        saveDefaultConfig();
+
+        // Wygeneruj messages_pl.yml zgodnie z językiem
+        ensureMessagesFile();
+
+        this.messageManager = new MessageManager(this);
+        this.codeManager = new CodeManager(this);
+
+        initLuckPerms();
+        registerCommands();
+
+        if (getConfig().getBoolean("auto-save.enabled", true)) {
+            int interval = getConfig().getInt("auto-save.interval", 5) * 60 * 20;
+            getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+                if (codeManager != null) codeManager.saveCodes();
+            }, interval, interval);
+        }
+
+        getLogger().info("Plugin Codes uruchomiony.");
+    }
+
+    @Override
+    public void onDisable() {
+        if (codeManager != null) codeManager.saveCodes();
+        getLogger().info("Plugin Codes wyłączony.");
+    }
+
+    private void registerCommands() {
+        PluginCommand cmd = getCommand("code");
+        if (cmd == null) {
+            getLogger().severe("Nie można zarejestrować komendy /code (sprawdź plugin.yml)!");
+            return;
+        }
+        CodeCommand executor = new CodeCommand(this);
+        cmd.setExecutor(executor);
+        cmd.setTabCompleter(executor);
     }
 
     private void initLuckPerms() {
@@ -67,39 +80,48 @@ public class Codes extends JavaPlugin {
         }
 
         if (getServer().getPluginManager().getPlugin("LuckPerms") == null) {
-            getLogger().info("LuckPerms nie znaleziony - używam standardowych permisji.");
+            getLogger().info("LuckPerms nie znaleziony.");
             return;
         }
 
         try {
             this.luckPermsHook = new LuckPermsHook(getLogger());
-            if (luckPermsHook.isAvailable()) {
-                this.luckPermsEnabled = true;
-                getLogger().info("Integracja z LuckPerms włączona!");
-            }
-        } catch (NoClassDefFoundError | Exception e) {
-            getLogger().warning("Nie można załadować LuckPerms hook: " + e.getMessage());
+            this.luckPermsEnabled = luckPermsHook.isAvailable();
+        } catch (Throwable t) {
+            getLogger().warning("Nie można uruchomić LuckPermsHook: " + t.getMessage());
             this.luckPermsHook = null;
+            this.luckPermsEnabled = false;
         }
     }
 
-    @Override
-    public void onDisable() {
-        if (codeManager != null) {
-            codeManager.saveCodes();
-        }
-        getLogger().info("Plugin Codes został wyłączony!");
+    public void reloadPlugin() {
+        reloadConfig();
+        ensureMessagesFile(); // jeśli overwrite-messages=true, to podmieni messages_pl.yml
+        if (messageManager != null) messageManager.reload();
+        if (codeManager != null) codeManager.loadCodes();
     }
 
-    private void registerCommands() {
-        PluginCommand kodCommand = getCommand("kod");
-        if (kodCommand != null) {
-            CodeCommand executor = new CodeCommand(this);
-            kodCommand.setExecutor(executor);
-            kodCommand.setTabCompleter(executor);
-            getLogger().info("Komenda /kod zarejestrowana!");
-        } else {
-            getLogger().severe("Nie można zarejestrować komendy /kod!");
+    private void ensureMessagesFile() {
+        String lang = getConfig().getString("language", "pl").toLowerCase();
+        boolean overwrite = getConfig().getBoolean("overwrite-messages", false);
+
+        String resource = switch (lang) {
+            case "en" -> "messages_en.yml";
+            case "pl" -> "messages_pl.yml";
+            default -> "messages_pl.yml";
+        };
+
+        File out = new File(getDataFolder(), "messages_pl.yml");
+        if (out.exists() && !overwrite) return;
+
+        try (InputStream in = getResource(resource)) {
+            if (in == null) {
+                getLogger().severe("Brak zasobu: " + resource + " w JAR!");
+                return;
+            }
+            Files.copy(in, out.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            getLogger().severe("Nie można zapisać messages_pl.yml: " + e.getMessage());
         }
     }
 
@@ -121,15 +143,5 @@ public class Codes extends JavaPlugin {
 
     public LuckPermsHook getLuckPermsHook() {
         return luckPermsHook;
-    }
-
-    public void reloadPlugin() {
-        reloadConfig();
-        if (messageManager != null) {
-            messageManager.reload();
-        }
-        if (codeManager != null) {
-            codeManager.loadCodes();
-        }
     }
 }

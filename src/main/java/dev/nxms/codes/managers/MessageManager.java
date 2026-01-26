@@ -16,8 +16,10 @@ import java.util.Map;
 public class MessageManager {
 
     private final Codes plugin;
+
     private FileConfiguration messagesConfig;
     private File messagesFile;
+
     private String prefix;
 
     public MessageManager(Codes plugin) {
@@ -26,21 +28,18 @@ public class MessageManager {
     }
 
     public void reload() {
-        messagesFile = new File(plugin.getDataFolder(), "messages.yml");
-        if (!messagesFile.exists()) {
-            plugin.saveResource("messages.yml", false);
-        }
+        messagesFile = new File(plugin.getDataFolder(), "messages_pl.yml");
         messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
         prefix = messagesConfig.getString("prefix", "&8[&6Kody&8] ");
     }
 
     public String getRaw(String key) {
-        String message = messagesConfig.getString(key);
-        if (message == null) {
-            plugin.getLogger().warning("Brak wiadomości w messages.yml: " + key);
-            return "&c[Brak: " + key + "]";
+        String msg = messagesConfig.getString(key);
+        if (msg == null) {
+            plugin.getLogger().warning("Brak wiadomości w messages_pl.yml: " + key);
+            return "&c[Missing: " + key + "]";
         }
-        return message;
+        return msg;
     }
 
     public String get(String key) {
@@ -49,26 +48,22 @@ public class MessageManager {
 
     public String get(String key, Map<String, String> placeholders) {
         String message = get(key);
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
+        for (Map.Entry<String, String> e : placeholders.entrySet()) {
+            message = message.replace("{" + e.getKey() + "}", e.getValue());
         }
         return message;
     }
 
-    public Component getComponent(String key) {
-        return colorize(get(key));
-    }
-
-    public Component getComponent(String key, Map<String, String> placeholders) {
-        return colorize(get(key, placeholders));
+    public Component colorize(String text) {
+        return LegacyComponentSerializer.legacyAmpersand().deserialize(text);
     }
 
     public void send(CommandSender sender, String key) {
-        sender.sendMessage(getComponent(key));
+        sender.sendMessage(colorize(get(key)));
     }
 
     public void send(CommandSender sender, String key, Map<String, String> placeholders) {
-        sender.sendMessage(getComponent(key, placeholders));
+        sender.sendMessage(colorize(get(key, placeholders)));
     }
 
     public void sendRaw(CommandSender sender, String key) {
@@ -77,37 +72,22 @@ public class MessageManager {
 
     public void sendRaw(CommandSender sender, String key, Map<String, String> placeholders) {
         String message = getRaw(key);
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
+        for (Map.Entry<String, String> e : placeholders.entrySet()) {
+            message = message.replace("{" + e.getKey() + "}", e.getValue());
         }
         sender.sendMessage(colorize(message));
     }
 
     /** Broadcast z prefixem */
     public void broadcast(String key) {
-        Component c = colorize(prefix + getRaw(key));
-        broadcastComponent(c);
+        broadcastComponent(colorize(prefix + getRaw(key)));
     }
 
-    /** Broadcast z prefixem + placeholderami */
+    /** Broadcast z prefixem + placeholdery */
     public void broadcast(String key, Map<String, String> placeholders) {
         String message = prefix + getRaw(key);
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
-        }
-        broadcastComponent(colorize(message));
-    }
-
-    /** Broadcast bez prefixu */
-    public void broadcastRaw(String key) {
-        broadcastComponent(colorize(getRaw(key)));
-    }
-
-    /** Broadcast bez prefixu + placeholdery */
-    public void broadcastRaw(String key, Map<String, String> placeholders) {
-        String message = getRaw(key);
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            message = message.replace("{" + entry.getKey() + "}", entry.getValue());
+        for (Map.Entry<String, String> e : placeholders.entrySet()) {
+            message = message.replace("{" + e.getKey() + "}", e.getValue());
         }
         broadcastComponent(colorize(message));
     }
@@ -117,10 +97,6 @@ public class MessageManager {
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(component);
         }
-    }
-
-    public Component colorize(String text) {
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(text);
     }
 
     public static Map<String, String> placeholders(String... pairs) {

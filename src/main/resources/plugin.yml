@@ -1,4 +1,4 @@
-name: Kody
+name: Codes
 version: '${version}'
 main: dev.nxms.codes.Codes
 api-version: '1.21'
@@ -17,6 +17,7 @@ permissions:
     default: true
 
 commands:
-  kod:
-    description: Główna komenda pluginu Codes
-    usage: /<command> [stworz|usun|lista|info|pomoc]
+  code:
+    description: Główna komenda pluginu
+    usage: /<command>
+    aliases: [kod]
