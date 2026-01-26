@@ -4,7 +4,7 @@ prefix: "&8[&6Kody&8] "
 code-created: "&aKod &e{code} &azostał pomyślnie utworzony!"
 code-created-unlimited-global: "&7(Nielimitowane użycia ogólne)"
 code-created-unlimited-player: "&7(Nielimitowane użycia na gracza)"
-code-created-delay: "&7(Opóźnienie: &e{seconds}s&7)"
+code-created-delay: "&7(Opóźnienie: &e{delay}&7)"
 code-created-broadcast-on: "&7(Ogłoszenie: &aTak&7)"
 code-created-broadcast-off: "&7(Ogłoszenie: &cNie&7)"
 
@@ -15,6 +15,9 @@ reward-received-permission: "&aOtrzymałeś permisję: &e{reward}"
 reward-received-rank: "&aOtrzymałeś rangę: &e{reward}"
 
 reload-success: "&aPlugin został przeładowany!"
+
+time-none: "Brak"
+invalid-delay-format: "&cNieprawidłowy format opóźnienia: &e{value}&c. Przykład: &e10s&c, &e1m10s&c, &e1d2h3m30s"
 
 # ===== BROADCAST (nie pokazuje kodu!) =====
 broadcast-reward-item: "&6{player} &eotrzymał przedmiot: &a{reward}"
@@ -31,7 +34,7 @@ code-not-found: "&cKod &e{code} &cnie istnieje!"
 code-already-exists: "&cKod &e{code} &cjuż istnieje!"
 code-expired: "&cTen kod wygasł!"
 code-already-used: "&cJuż wykorzystałeś ten kod maksymalną liczbę razy!"
-code-cooldown: "&cMusisz poczekać &e{seconds} &csekund przed ponownym użyciem tego kodu!"
+code-cooldown: "&cMusisz jeszcze poczekać: &e{time}&c."
 
 must-hold-item: "&cMusisz trzymać przedmiot w ręce!"
 invalid-reward-type: "&cNieprawidłowy typ nagrody!"

@@ -4,7 +4,7 @@ prefix: "&8[&6Codes&8] "
 code-created: "&aCode &e{code} &ahas been created!"
 code-created-unlimited-global: "&7(Unlimited global uses)"
 code-created-unlimited-player: "&7(Unlimited per-player uses)"
-code-created-delay: "&7(Delay: &e{seconds}s&7)"
+code-created-delay: "&7(Delay: &e{delay}&7)"
 code-created-broadcast-on: "&7(Announcement: &aYes&7)"
 code-created-broadcast-off: "&7(Announcement: &cNo&7)"
 
@@ -15,6 +15,9 @@ reward-received-permission: "&aYou received permission: &e{reward}"
 reward-received-rank: "&aYou received rank: &e{reward}"
 
 reload-success: "&aPlugin reloaded!"
+
+time-none: "None"
+invalid-delay-format: "&cInvalid delay format: &e{value}&c. Example: &e10s&c, &e1m10s&c, &e1d2h3m30s"
 
 # ===== BROADCAST (no code shown) =====
 broadcast-reward-item: "&6{player} &ereceived an item: &a{reward}"
@@ -31,7 +34,7 @@ code-not-found: "&cCode &e{code} &cdoes not exist!"
 code-already-exists: "&cCode &e{code} &calready exists!"
 code-expired: "&cThis code is expired!"
 code-already-used: "&cYou already used this code the maximum number of times!"
-code-cooldown: "&cYou must wait &e{seconds} &cseconds before using this code again!"
+code-cooldown: "&cYou must still wait: &e{time}&c."
 
 must-hold-item: "&cYou must hold an item in your main hand!"
 invalid-reward-type: "&cInvalid reward type!"

@@ -15,6 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CodeCommand implements CommandExecutor, TabCompleter {
 
@@ -160,7 +162,13 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         try {
             maxGlobalUses = Integer.parseInt(args[2]);
             maxPlayerUses = Integer.parseInt(args[3]);
-            delaySeconds = Integer.parseInt(args[4]);
+            delaySeconds = parseDelayToSeconds(args[4]);
+            if (delaySeconds < 0) {
+                msg.send(sender, "invalid-delay-format", MessageManager.placeholders(
+                        "value", args[4]
+                ));
+                return true;
+            }
         } catch (NumberFormatException e) {
             msg.send(sender, "invalid-number");
             return true;
@@ -265,7 +273,11 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
 
         if (maxGlobalUses == Code.UNLIMITED) msg.send(sender, "code-created-unlimited-global");
         if (maxPlayerUses == Code.UNLIMITED) msg.send(sender, "code-created-unlimited-player");
-        if (delaySeconds > 0) msg.send(sender, "code-created-delay", MessageManager.placeholders("seconds", String.valueOf(delaySeconds)));
+        if (delaySeconds > 0) {
+            msg.send(sender, "code-created-delay", MessageManager.placeholders(
+                    "delay", formatDuration(delaySeconds)
+            ));
+        }
 
         if (announce) msg.send(sender, "code-created-broadcast-on");
         else msg.send(sender, "code-created-broadcast-off");
@@ -278,6 +290,118 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         if (v.equals("tak") || v.equals("true") || v.equals("yes")) return true;
         if (v.equals("nie") || v.equals("false") || v.equals("no")) return false;
         return null;
+    }
+
+    private String getLang() {
+        return plugin.getConfig().getString("language", "pl").toLowerCase(Locale.ROOT);
+    }
+
+    private String formatDurationLong(int seconds) {
+        if (seconds <= 0) {
+            // możesz też zwrócić msg.getRaw("time-none") jeśli masz taki klucz
+            return getLang().equals("en") ? "0 seconds" : "0 sekund";
+        }
+
+        int s = seconds;
+
+        int days = s / 86400; s %= 86400;
+        int hours = s / 3600; s %= 3600;
+        int minutes = s / 60; s %= 60;
+
+        List<String> parts = new ArrayList<>();
+        boolean en = getLang().equals("en");
+
+        if (days > 0) parts.add(en ? (days + " " + enPlural(days, "day", "days")) : (days + " " + plPlural(days, "dzień", "dni", "dni")));
+        if (hours > 0) parts.add(en ? (hours + " " + enPlural(hours, "hour", "hours")) : (hours + " " + plPlural(hours, "godzina", "godziny", "godzin")));
+        if (minutes > 0) parts.add(en ? (minutes + " " + enPlural(minutes, "minute", "minutes")) : (minutes + " " + plPlural(minutes, "minuta", "minuty", "minut")));
+        if (s > 0) parts.add(en ? (s + " " + enPlural(s, "second", "seconds")) : (s + " " + plPlural(s, "sekunda", "sekundy", "sekund")));
+
+        return String.join(en ? " " : " ", parts);
+    }
+
+    private String enPlural(int value, String singular, String plural) {
+        return value == 1 ? singular : plural;
+    }
+
+    /**
+     * Polish plural rules:
+     * 1 -> one
+     * 2-4 (except 12-14) -> few
+     * others -> many
+     */
+    private String plPlural(int value, String one, String few, String many) {
+        int mod10 = value % 10;
+        int mod100 = value % 100;
+
+        if (value == 1) return one;
+        if (mod10 >= 2 && mod10 <= 4 && !(mod100 >= 12 && mod100 <= 14)) return few;
+        return many;
+    }
+
+    private static final Pattern DURATION_PART = Pattern.compile("(\\d+)([dhms])");
+
+    private int parseDelayToSeconds(String input) {
+        if (input == null) return -1;
+        String s = input.toLowerCase(Locale.ROOT).replaceAll("\\s+", "");
+
+        // sama liczba = sekundy
+        if (s.matches("\\d+")) {
+            try {
+                return Integer.parseInt(s);
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+        }
+
+        Matcher m = DURATION_PART.matcher(s);
+        long total = 0;
+        int lastEnd = 0;
+
+        while (m.find()) {
+            // wymuś brak “dziur” w stringu (np. 1m-10s -> błąd)
+            if (m.start() != lastEnd) return -1;
+
+            long value;
+            try {
+                value = Long.parseLong(m.group(1));
+            } catch (NumberFormatException e) {
+                return -1;
+            }
+
+            String unit = m.group(2);
+            switch (unit) {
+                case "d" -> total += value * 86400L;
+                case "h" -> total += value * 3600L;
+                case "m" -> total += value * 60L;
+                case "s" -> total += value;
+                default -> { return -1; }
+            }
+
+            if (total > Integer.MAX_VALUE) return -1;
+            lastEnd = m.end();
+        }
+
+        // jeśli nie dopasowało nic albo zostały śmieci na końcu
+        if (lastEnd != s.length() || lastEnd == 0) return -1;
+
+        return (int) total;
+    }
+
+    private String formatDuration(int seconds) {
+        if (seconds <= 0) return msg.getRaw("time-none"); // PL/EN zależnie od messages
+
+        int s = seconds;
+        int d = s / 86400; s %= 86400;
+        int h = s / 3600;  s %= 3600;
+        int m = s / 60;    s %= 60;
+
+        StringBuilder out = new StringBuilder();
+        if (d > 0) out.append(d).append("d");
+        if (h > 0) out.append(h).append("h");
+        if (m > 0) out.append(m).append("m");
+        if (s > 0) out.append(s).append("s");
+
+        return out.length() == 0 ? "0s" : out.toString();
     }
 
     // ----------------------------
@@ -469,7 +593,9 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             ));
         }
 
-        msg.sendRaw(sender, "info-delay", MessageManager.placeholders("delay", code.getCooldownDisplay()));
+        msg.sendRaw(sender, "info-delay", MessageManager.placeholders(
+                "delay", formatDuration(code.getCooldown())
+        ));
         msg.sendRaw(sender, "info-broadcast", MessageManager.placeholders("broadcast", code.getBroadcastDisplay()));
 
         msg.sendRaw(sender, "info-reward-type", MessageManager.placeholders("type", code.getRewardType().name()));
@@ -514,9 +640,14 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (code.isOnCooldown(player.getUniqueId())) {
-            int remaining = code.getRemainingCooldown(player.getUniqueId());
-            msg.send(sender, "code-cooldown", MessageManager.placeholders("seconds", String.valueOf(remaining)));
+        int remaining = code.getRemainingCooldown(player.getUniqueId());
+        if (remaining > 0) {
+            String timeText = formatDurationLong(remaining);
+
+            msg.send(player, "code-cooldown", MessageManager.placeholders(
+                    "time", timeText,
+                    "seconds", String.valueOf(remaining)
+            ));
             return true;
         }
 
@@ -532,7 +663,17 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
 
         CodeManager.RedeemResult result = codeManager.redeemCode(player, codeName);
 
+
         switch (result) {
+            case COOLDOWN -> {
+                int remaining2 = code.getRemainingCooldown(player.getUniqueId());
+                String timeText2 = formatDurationLong(remaining2);
+
+                msg.send(player, "code-cooldown", MessageManager.placeholders(
+                        "time", timeText2,
+                        "seconds", String.valueOf(remaining2)
+                ));
+            }
             case SUCCESS_ITEM -> {
                 msg.send(player, "code-redeemed");
                 msg.send(player, "reward-received-item");
@@ -678,7 +819,12 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             if (args.length == 2) return filter(List.of(pl ? "<nazwa_kodu>" : "<code_name>", "<code_name>"), args[1]);
             if (args.length == 3) return filter(List.of(pl ? "<użycia_ogólne>" : "<global_uses>", "<global_uses>"), args[2]);
             if (args.length == 4) return filter(List.of(pl ? "<użycia_gracza>" : "<player_uses>", "<player_uses>"), args[3]);
-            if (args.length == 5) return filter(List.of(pl ? "<opóźnienie_sekundy>" : "<delay_seconds>", "<delay_seconds>"), args[4]);
+            if (args.length == 5) {
+                return filter(List.of(
+                        pl ? "<opóźnienie>" : "<delay>",
+                        "10s", "30s", "1m", "5m", "1h", "1d", "2m30s", "1d2h2m30s"
+                ), args[4]);
+            }
             if (args.length == 6) return filter(List.of(pl ? "tak" : "yes", pl ? "nie" : "no", "true", "false", "tak", "nie", "yes", "no"), args[5]);
 
             if (args.length == 7) {

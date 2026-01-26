@@ -269,11 +269,26 @@ public class CodeManager {
         return true;
     }
 
+    public enum RedeemResult {
+        SUCCESS_ITEM,
+        SUCCESS_PERMISSION,
+        SUCCESS_RANK,
+        COOLDOWN,
+        NOT_FOUND,
+        RANK_ERROR
+    }
+
     public RedeemResult redeemCode(Player player, String codeName) {
         Code code = getCode(codeName);
         if (code == null) {
             return RedeemResult.NOT_FOUND;
         }
+
+        if (code.isOnCooldown(player.getUniqueId())) {
+            return RedeemResult.COOLDOWN;
+        }
+
+        code.use(player.getUniqueId());
 
         code.use(player.getUniqueId());
 
@@ -366,12 +381,4 @@ public class CodeManager {
             int maxPlayerUses,
             Map<UUID, Integer> playerUses
     ) { }
-
-    public enum RedeemResult {
-        SUCCESS_ITEM,
-        SUCCESS_PERMISSION,
-        SUCCESS_RANK,
-        NOT_FOUND,
-        RANK_ERROR
-    }
 }
