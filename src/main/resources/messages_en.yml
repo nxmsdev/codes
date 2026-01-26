@@ -8,6 +8,8 @@ code-created-delay: "&7(Delay: &e{delay}&7)"
 code-created-broadcast-on: "&7(Announcement: &aYes&7)"
 code-created-broadcast-off: "&7(Announcement: &cNo&7)"
 
+code-overwritten: "&aCode &e{code} &ahas been overwritten!"
+
 code-deleted: "&aCode &e{code} &ahas been deleted!"
 code-redeemed: "&aYou redeemed a code!"
 reward-received-item: "&aYou received an item reward!"
@@ -90,6 +92,7 @@ help-player-help: "&e/code help &7- Show this help"
 
 help-admin-header: "&6&m─────&r &6Admin help - Codes &6&m─────"
 help-admin-create: "&e/code create <name> <global_uses> <player_uses> <delay> <announce> <reward>"
+help-admin-overwrite: "&e/code overwrite <name> <global_uses> <player_uses> <delay> <announce> <reward>"
 help-admin-rewards-header: "&7Reward types:"
 help-admin-reward-item: "&7  • &eitem &7- item in your main hand"
 help-admin-reward-item-material: "&7  • &eitem:MATERIAL &7- e.g. item:DIAMOND"

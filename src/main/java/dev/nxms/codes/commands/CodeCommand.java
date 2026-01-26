@@ -63,7 +63,8 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             }
 
             // ADMIN: create/delete/list/info (PL/EN)
-            if (sub.equals("stworz") || sub.equals("create")) return handleCreate(sender, args);
+            if (sub.equals("stworz") || sub.equals("create")) return handleCreate(sender, args, false);
+            if (sub.equals("nadpisz") || sub.equals("overwrite")) return handleCreate(sender, args, true);
             if (sub.equals("usun") || sub.equals("delete")) return handleDelete(sender, args);
             if (sub.equals("lista") || sub.equals("list")) return handleList(sender, args);
             if (sub.equals("info")) return handleInfo(sender, args);
@@ -112,6 +113,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         msg.sendRaw(sender, "help-admin-header");
         sender.sendMessage("");
         msg.sendRaw(sender, "help-admin-create");
+        msg.sendRaw(sender, "help-admin-overwrite");
         sender.sendMessage("");
         msg.sendRaw(sender, "help-admin-rewards-header");
         msg.sendRaw(sender, "help-admin-reward-item");
@@ -141,7 +143,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
     // reward: item/przedmiot | item:MAT:amt / przedmiot:MAT:amt | permission:... / permisja:... | rank:... / ranga:...
     // ----------------------------
 
-    private boolean handleCreate(CommandSender sender, String[] args) {
+    private boolean handleCreate(CommandSender sender, String[] args, boolean overwrite) {
         if (!sender.hasPermission("codes.admin")) {
             msg.send(sender, "no-permission");
             return true;
@@ -199,7 +201,9 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 msg.send(sender, "must-hold-item");
                 return true;
             }
-            success = codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, held.clone());
+            success = overwrite
+                    ? codeManager.overwriteCode(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, held.clone())
+                    : codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, held.clone());
         }
         // ITEM by name: item:... / przedmiot:...
         else if (rewardArg.toLowerCase(Locale.ROOT).startsWith("item:") || rewardArg.toLowerCase(Locale.ROOT).startsWith("przedmiot:")) {
@@ -229,7 +233,9 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             if (amount > 64) amount = 64;
 
             ItemStack reward = new ItemStack(mat, amount);
-            success = codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, reward);
+            success = overwrite
+                    ? codeManager.overwriteCode(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, reward)
+                    : codeManager.createCode(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, reward);
         }
         // PERMISSION: permission:... / permisja:...
         else if (rewardArg.toLowerCase(Locale.ROOT).startsWith("permission:") || rewardArg.toLowerCase(Locale.ROOT).startsWith("permisja:")) {
@@ -238,7 +244,9 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 msg.send(sender, "invalid-reward-type");
                 return true;
             }
-            success = codeManager.createCodeWithPermission(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, perm);
+            success = overwrite
+                    ? codeManager.overwriteCodeWithPermission(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, perm)
+                    : codeManager.createCodeWithPermission(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, perm);
         }
         // RANK: rank:... / ranga:...
         else if (rewardArg.toLowerCase(Locale.ROOT).startsWith("rank:") || rewardArg.toLowerCase(Locale.ROOT).startsWith("ranga:")) {
@@ -257,7 +265,9 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            success = codeManager.createCodeWithRank(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, rank);
+            success = overwrite
+                    ? codeManager.overwriteCodeWithRank(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, rank)
+                    : codeManager.createCodeWithRank(codeName, maxGlobalUses, maxPlayerUses, delaySeconds, announce, rank);
         }
         else {
             msg.send(sender, "invalid-reward-type");
@@ -422,6 +432,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         }
 
         String codeName = args[1];
+        boolean existedBefore = codeManager.existsAny(codeName);
         if (codeManager.deleteCode(codeName)) {
             msg.send(sender, "code-deleted", MessageManager.placeholders("code", codeName));
         } else {
@@ -747,38 +758,31 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
     // ----------------------------
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
-                                                @NotNull String label, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+
 
         if (codeManager == null) return Collections.emptyList();
 
         boolean isAdmin = sender.hasPermission("codes.admin");
         boolean isPlayer = sender.hasPermission("codes.player");
 
-        String lang = plugin.getConfig().getString("language", "pl").toLowerCase(Locale.ROOT);
-        boolean pl = lang.equals("pl");
-        boolean en = lang.equals("en");
-
         List<String> out = new ArrayList<>();
+
+        boolean pl = label.equalsIgnoreCase("kod"); // /kod = PL, /code = EN
 
         // 1 argument
         if (args.length == 1) {
             if (isAdmin) {
                 // Prefer language, but accept both
                 if (pl) {
-                    out.addAll(List.of("stworz", "usun", "lista", "info", "przeladuj", "pomoc"));
+                    out.addAll(List.of("stworz", "nadpisz", "usun", "lista", "info", "przeladuj", "pomoc"));
                 } else {
-                    out.addAll(List.of("create", "delete", "list", "info", "reload", "help"));
+                    out.addAll(List.of("create", "overwrite", "delete", "list", "info", "reload", "help"));
                 }
-
-                // also show the other language variants (optional but useful)
-                out.addAll(List.of("stworz", "usun", "lista", "przeladuj", "pomoc"));
-                out.addAll(List.of("create", "delete", "list", "reload", "help"));
             } else if (isPlayer) {
                 // player cannot tab real code names
-                if (pl) out.add("pomoc");
-                if (en) out.add("help");
-                out.addAll(List.of("pomoc", "help", "<code_name>"));
+                if (pl) out.addAll(List.of("pomoc", "<nazwa_kodu>"));
+                if (!pl) out.addAll(List.of("help", "<code_name>"));
             }
             return filter(out, args[0]);
         }
@@ -800,7 +804,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         // list/lista second arg
         if (args.length == 2 && isAdmin && (sub.equals("lista") || sub.equals("list"))) {
             if (pl) out.addAll(List.of("aktywne", "zuzyte"));
-            if (en) out.addAll(List.of("active", "used"));
+            if (!pl) out.addAll(List.of("active", "used"));
             out.addAll(List.of("aktywne", "zuzyte", "active", "used"));
             return filter(out, args[1]);
         }
@@ -809,33 +813,33 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         if (args.length == 3 && isAdmin && (sub.equals("lista") || sub.equals("list"))) {
             String type = args[1].toLowerCase(Locale.ROOT);
             if (type.equals("zuzyte") || type.equals("used")) {
-                out.addAll(List.of("wyczysc", "clear"));
+                out.addAll(List.of(pl ? "wyczysc" : "clear"));
                 return filter(out, args[2]);
             }
         }
 
-        // create/stworz args: name/global/player/delay/announce/reward
-        if (isAdmin && (sub.equals("stworz") || sub.equals("create"))) {
-            if (args.length == 2) return filter(List.of(pl ? "<nazwa_kodu>" : "<code_name>", "<code_name>"), args[1]);
-            if (args.length == 3) return filter(List.of(pl ? "<użycia_ogólne>" : "<global_uses>", "<global_uses>"), args[2]);
-            if (args.length == 4) return filter(List.of(pl ? "<użycia_gracza>" : "<player_uses>", "<player_uses>"), args[3]);
+        if (isAdmin && ((sub.equals("stworz") || sub.equals("create") || sub.equals("nadpisz") || sub.equals("overwrite")))) {
+            if (args.length == 2) return filter(List.of(pl ? "<nazwa_kodu>" : "<code_name>"), args[1]);
+            if (args.length == 3) return filter(List.of(pl ? "<użycia_ogólne>" : "<global_uses>"), args[2]);
+            if (args.length == 4) return filter(List.of(pl ? "<użycia_gracza>" : "<player_uses>"), args[3]);
             if (args.length == 5) {
                 return filter(List.of(
                         pl ? "<opóźnienie>" : "<delay>",
                         "10s", "30s", "1m", "5m", "1h", "1d", "2m30s", "1d2h2m30s"
                 ), args[4]);
             }
-            if (args.length == 6) return filter(List.of(pl ? "tak" : "yes", pl ? "nie" : "no", "true", "false", "tak", "nie", "yes", "no"), args[5]);
+            if (args.length == 6) return filter(List.of(pl ? "<ogłoszenie>" : "<broadcast>", pl ? "tak": "yes", pl ? "nie" : "no"), args[5]);
 
             if (args.length == 7) {
                 String cur = args[6].toLowerCase(Locale.ROOT);
 
                 // reward keywords (both languages)
                 out.addAll(List.of(
-                        "przedmiot", "przedmiot:",
-                        "item", "item:",
-                        "permisja:", "permission:",
-                        "ranga:", "rank:"
+                        pl ? "<nagroda>" : "<reward>",
+                        pl ? "przedmiot" : "item",
+                        pl ? "przedmiot:" : "item:",
+                        pl ? "permisja:": "permission:",
+                        pl ? "ranga:" : "rank:"
                 ));
 
                 // if starts with item/przedmiot:

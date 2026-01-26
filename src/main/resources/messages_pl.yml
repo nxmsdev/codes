@@ -8,6 +8,8 @@ code-created-delay: "&7(Opóźnienie: &e{delay}&7)"
 code-created-broadcast-on: "&7(Ogłoszenie: &aTak&7)"
 code-created-broadcast-off: "&7(Ogłoszenie: &cNie&7)"
 
+code-overwritten: "&aKod &e{code} &azostał nadpisany!"
+
 code-deleted: "&aKod &e{code} &azostał usunięty!"
 code-redeemed: "&aPomyślnie wykorzystałeś kod!"
 reward-received-item: "&aOtrzymałeś przedmiot jako nagrodę!"
@@ -90,6 +92,7 @@ help-player-help: "&e/kod pomoc &7- Wyświetla tę pomoc"
 
 help-admin-header: "&6&m─────&r &6Pomoc Admin - Kody &6&m─────"
 help-admin-create: "&e/kod stworz <nazwa> <użycia_ogólne> <użycia_gracza> <opóźnienie> <ogłoszenie> <nagroda>"
+help-admin-overwrite: "&e/kod nadpisz <nazwa> <użycia_ogólne> <użycia_gracza> <opóźnienie> <ogłoszenie> <nagroda>"
 help-admin-rewards-header: "&7Typy nagród:"
 help-admin-reward-item: "&7  • &eprzedmiot &7- przedmiot trzymany w ręce"
 help-admin-reward-item-material: "&7  • &eprzedmiot:MATERIAL &7- np. przedmiot:DIAMOND"

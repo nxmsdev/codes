@@ -373,6 +373,41 @@ public class CodeManager {
         return false;
     }
 
+    public boolean existsAny(String name) {
+        String key = name.toLowerCase(Locale.ROOT);
+        return codes.containsKey(key) || usedCodes.containsKey(key);
+    }
+
+    private void removeAny(String name) {
+        String key = name.toLowerCase(Locale.ROOT);
+        codes.remove(key);
+        usedCodes.remove(key);
+    }
+
+    public boolean overwriteCode(String name, int maxGlobalUses, int maxPlayerUses, int delaySeconds, boolean broadcast, ItemStack itemReward) {
+        removeAny(name);
+        Code code = new Code(name, maxGlobalUses, maxPlayerUses, delaySeconds, broadcast, itemReward);
+        codes.put(name.toLowerCase(Locale.ROOT), code);
+        saveCodes();
+        return true;
+    }
+
+    public boolean overwriteCodeWithPermission(String name, int maxGlobalUses, int maxPlayerUses, int delaySeconds, boolean broadcast, String permission) {
+        removeAny(name);
+        Code code = new Code(name, maxGlobalUses, maxPlayerUses, delaySeconds, broadcast, permission, Code.RewardType.PERMISSION);
+        codes.put(name.toLowerCase(Locale.ROOT), code);
+        saveCodes();
+        return true;
+    }
+
+    public boolean overwriteCodeWithRank(String name, int maxGlobalUses, int maxPlayerUses, int delaySeconds, boolean broadcast, String rank) {
+        removeAny(name);
+        Code code = new Code(name, maxGlobalUses, maxPlayerUses, delaySeconds, broadcast, rank, Code.RewardType.RANK);
+        codes.put(name.toLowerCase(Locale.ROOT), code);
+        saveCodes();
+        return true;
+    }
+
     public record UsedCodeInfo(
             String name,
             String rewardDisplay,
