@@ -767,7 +767,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
 
         List<String> out = new ArrayList<>();
 
-        boolean pl = label.equals("kod");
+        boolean pl = label.equalsIgnoreCase("kod"); // /kod = PL, /code = EN
 
         // 1 argument
         if (args.length == 1) {
