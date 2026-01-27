@@ -124,7 +124,6 @@ In `config.yml`:
 
 ```yml
 language: pl   # or en
-overwrite-messages: false
 ```
 ## Other
 
