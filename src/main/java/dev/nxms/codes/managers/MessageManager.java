@@ -31,12 +31,14 @@ public class MessageManager {
         messagesFile = new File(plugin.getDataFolder(), "messages_pl.yml");
         messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
         prefix = messagesConfig.getString("prefix", "&8[&6Kody&8] ");
+
+        plugin.getLogger().info("Message file has been reloaded.");
     }
 
     public String getRaw(String key) {
         String msg = messagesConfig.getString(key);
         if (msg == null) {
-            plugin.getLogger().warning("Brak wiadomości w messages_pl.yml: " + key);
+            plugin.getLogger().warning("Couldn't find a message in messages_pl.yml: " + key);
             return "&c[Missing: " + key + "]";
         }
         return msg;

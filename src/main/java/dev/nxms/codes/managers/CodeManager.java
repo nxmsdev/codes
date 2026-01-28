@@ -33,8 +33,10 @@ public class CodeManager {
         codesFile = new File(plugin.getDataFolder(), "codes.yml");
 
         if (!codesFile.exists()) {
+            plugin.getLogger().warning("Couldn't find codes.yml file!");
             try {
                 codesFile.createNewFile();
+                plugin.getLogger().info("Created new codes.yml file.");
             } catch (IOException e) {
                 plugin.getLogger().severe("Cannot create codes.yml file!");
                 e.printStackTrace();
@@ -47,7 +49,7 @@ public class CodeManager {
         loadActiveCodes();
         loadUsedCodes();
 
-        plugin.getLogger().info("Załadowano " + codes.size() + " aktywnych kodów i " + usedCodes.size() + " zużytych kodów.");
+        plugin.getLogger().info("Loaded " + codes.size() + " active codes and " + usedCodes.size() + " used codes.");
     }
 
     private void loadActiveCodes() {
@@ -110,7 +112,7 @@ public class CodeManager {
                 codes.put(codeName.toLowerCase(), code);
 
             } catch (Exception e) {
-                plugin.getLogger().warning("Cannot load code: " + codeName);
+                plugin.getLogger().warning("Cannot load active code: " + codeName + "!");
                 e.printStackTrace();
             }
         }
@@ -145,7 +147,7 @@ public class CodeManager {
                 usedCodes.put(codeName.toLowerCase(), info);
 
             } catch (Exception e) {
-                plugin.getLogger().warning("Cannot load used code: " + codeName);
+                plugin.getLogger().warning("Cannot load used code: " + codeName + "!");
             }
         }
     }
@@ -178,6 +180,8 @@ public class CodeManager {
             for (Map.Entry<UUID, Long> entry : code.getPlayerCooldowns().entrySet()) {
                 codesConfig.set(path + ".player-cooldowns." + entry.getKey().toString(), entry.getValue());
             }
+
+            plugin.getLogger().info("All codes has been saved.");
         }
 
         for (UsedCodeInfo info : usedCodes.values()) {
@@ -352,7 +356,7 @@ public class CodeManager {
         }
 
         player.addAttachment(plugin, permission, true);
-        plugin.getLogger().info("Nadano permisję " + permission + " graczowi " + player.getName() + " (tymczasowo)");
+        plugin.getLogger().info("Granted permission " + permission + " to a player " + player.getName() + " (temporarily)");
     }
 
     private boolean grantRank(Player player, String rank) {

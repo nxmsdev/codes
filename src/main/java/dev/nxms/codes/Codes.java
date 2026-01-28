@@ -42,6 +42,7 @@ public class Codes extends JavaPlugin {
 
         initLuckPerms();
         registerCommands();
+        getLogger().info("Registering commands.");
 
         if (getConfig().getBoolean("auto-save.enabled", true)) {
             int interval = getConfig().getInt("auto-save.interval", 5) * 60 * 20;
@@ -50,19 +51,19 @@ public class Codes extends JavaPlugin {
             }, interval, interval);
         }
 
-        getLogger().info("Plugin Codes uruchomiony.");
+        getLogger().info("Codes plugin has been enabled.");
     }
 
     @Override
     public void onDisable() {
         if (codeManager != null) codeManager.saveCodes();
-        getLogger().info("Plugin Codes wyłączony.");
+        getLogger().info("Codes plugin has been disabled.");
     }
 
     private void registerCommands() {
         PluginCommand cmd = getCommand("code");
         if (cmd == null) {
-            getLogger().severe("Nie można zarejestrować komendy /code (sprawdź plugin.yml)!");
+            getLogger().severe("Couldn't register /code command (check plugin.yml)!");
             return;
         }
         CodeCommand executor = new CodeCommand(this);
@@ -75,12 +76,12 @@ public class Codes extends JavaPlugin {
         this.luckPermsHook = null;
 
         if (!getConfig().getBoolean("luckperms-integration", true)) {
-            getLogger().info("Integracja z LuckPerms wyłączona w configu.");
+            getLogger().warning("LuckPerms integration is disabled in config!");
             return;
         }
 
         if (getServer().getPluginManager().getPlugin("LuckPerms") == null) {
-            getLogger().info("LuckPerms nie znaleziony.");
+            getLogger().warning("Couldn't find LuckPerms plugin!");
             return;
         }
 
@@ -88,7 +89,7 @@ public class Codes extends JavaPlugin {
             this.luckPermsHook = new LuckPermsHook(getLogger());
             this.luckPermsEnabled = luckPermsHook.isAvailable();
         } catch (Throwable t) {
-            getLogger().warning("Nie można uruchomić LuckPermsHook: " + t.getMessage());
+            getLogger().warning("Couldn't launch LuckPermsHook: " + t.getMessage());
             this.luckPermsHook = null;
             this.luckPermsEnabled = false;
         }
@@ -99,11 +100,15 @@ public class Codes extends JavaPlugin {
         ensureMessagesFile(); // jeśli overwrite-messages=true, to podmieni messages_pl.yml
         if (messageManager != null) messageManager.reload();
         if (codeManager != null) codeManager.loadCodes();
+
+        getLogger().info("Codes plugin has been reloaded.");
     }
 
     private void ensureMessagesFile() {
         String lang = getConfig().getString("language", "pl").toLowerCase();
         boolean overwrite = getConfig().getBoolean("overwrite-messages", false);
+
+        if (overwrite) getLogger().warning("Messages file has been overwritten! If this is an accidental action check config.yml file!");
 
         String resource = switch (lang) {
             case "en" -> "messages_en.yml";
@@ -121,7 +126,7 @@ public class Codes extends JavaPlugin {
             }
             Files.copy(in, out.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            getLogger().severe("Nie można zapisać messages_pl.yml: " + e.getMessage());
+            getLogger().severe("Couldn't save messages_pl.yml: " + e.getMessage());
         }
     }
 
