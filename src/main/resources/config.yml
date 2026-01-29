@@ -1,7 +1,7 @@
 # Codes - konfiguracja
 
 # pl / en
-language: pl
+language: en
 
 # Czy przy starcie (i /code reload) nadpisywać messages_pl.yml wersją językową
 # UWAGA: true nadpisze Twoje zmiany w messages_pl.yml
@@ -13,4 +13,4 @@ luckperms-integration: true
 # Auto zapis co X minut
 auto-save:
   enabled: true
-  interval: 5
+  interval: 30

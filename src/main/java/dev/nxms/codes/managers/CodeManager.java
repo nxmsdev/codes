@@ -180,8 +180,6 @@ public class CodeManager {
             for (Map.Entry<UUID, Long> entry : code.getPlayerCooldowns().entrySet()) {
                 codesConfig.set(path + ".player-cooldowns." + entry.getKey().toString(), entry.getValue());
             }
-
-            plugin.getLogger().info("All codes has been saved.");
         }
 
         for (UsedCodeInfo info : usedCodes.values()) {

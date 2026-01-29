@@ -45,7 +45,7 @@ public class Codes extends JavaPlugin {
         getLogger().info("Registering commands.");
 
         if (getConfig().getBoolean("auto-save.enabled", true)) {
-            int interval = getConfig().getInt("auto-save.interval", 5) * 60 * 20;
+            int interval = getConfig().getInt("auto-save.interval", 1) * 60 * 20;
             getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
                 if (codeManager != null) codeManager.saveCodes();
             }, interval, interval);
