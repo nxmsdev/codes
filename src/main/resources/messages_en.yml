@@ -1,3 +1,4 @@
+prefix: ""
 prefix-error: "&8[&c&l❌&r&8]&r"
 prefix-success: "&8[&a&l✔&r&8]&r"
 prefix-hint: "&8[&e&l?&r&8]&r"
