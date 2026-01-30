@@ -104,36 +104,36 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             msg.send(sender, "no-permission");
             return;
         }
-        msg.sendRaw(sender, "help-player-header");
-        msg.sendRaw(sender, "help-player-use");
-        msg.sendRaw(sender, "help-player-help");
-        msg.sendRaw(sender, "help-player-footer");
+        msg.send(sender, "help-player-header");
+        msg.send(sender, "help-player-use");
+        msg.send(sender, "help-player-help");
+        msg.send(sender, "help-player-footer");
     }
 
     private void sendHelpAdmin(CommandSender sender) {
-        msg.sendRaw(sender, "help-admin-header");
+        msg.send(sender, "help-admin-header");
         sender.sendMessage("");
-        msg.sendRaw(sender, "help-admin-create");
-        msg.sendRaw(sender, "help-admin-overwrite");
+        msg.send(sender, "help-admin-create");
+        msg.send(sender, "help-admin-overwrite");
         sender.sendMessage("");
-        msg.sendRaw(sender, "help-admin-rewards-header");
-        msg.sendRaw(sender, "help-admin-reward-item");
-        msg.sendRaw(sender, "help-admin-reward-item-material");
-        msg.sendRaw(sender, "help-admin-reward-item-amount");
-        msg.sendRaw(sender, "help-admin-reward-permission");
-        msg.sendRaw(sender, "help-admin-reward-rank");
+        msg.send(sender, "help-admin-rewards-header");
+        msg.send(sender, "help-admin-reward-item");
+        msg.send(sender, "help-admin-reward-item-material");
+        msg.send(sender, "help-admin-reward-item-amount");
+        msg.send(sender, "help-admin-reward-permission");
+        msg.send(sender, "help-admin-reward-rank");
         sender.sendMessage("");
-        msg.sendRaw(sender, "help-admin-unlimited-hint");
-        msg.sendRaw(sender, "help-admin-delay-hint");
-        msg.sendRaw(sender, "help-admin-broadcast-hint");
+        msg.send(sender, "help-admin-unlimited-hint");
+        msg.send(sender, "help-admin-delay-hint");
+        msg.send(sender, "help-admin-broadcast-hint");
         sender.sendMessage("");
-        msg.sendRaw(sender, "help-admin-delete");
-        msg.sendRaw(sender, "help-admin-list-active");
-        msg.sendRaw(sender, "help-admin-list-used");
-        msg.sendRaw(sender, "help-admin-list-clear");
-        msg.sendRaw(sender, "help-admin-info");
-        msg.sendRaw(sender, "help-admin-reload");
-        msg.sendRaw(sender, "help-admin-footer");
+        msg.send(sender, "help-admin-delete");
+        msg.send(sender, "help-admin-list-active");
+        msg.send(sender, "help-admin-list-used");
+        msg.send(sender, "help-admin-list-clear");
+        msg.send(sender, "help-admin-info");
+        msg.send(sender, "help-admin-reload");
+        msg.send(sender, "help-admin-footer");
     }
 
     // ----------------------------
@@ -461,11 +461,11 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            msg.sendRaw(sender, "list-usage-header");
-            msg.sendRaw(sender, "list-usage-active");
-            msg.sendRaw(sender, "list-usage-used");
-            msg.sendRaw(sender, "list-usage-clear");
-            msg.sendRaw(sender, "list-usage-footer");
+            msg.send(sender, "list-usage-header");
+            msg.send(sender, "list-usage-active");
+            msg.send(sender, "list-usage-used");
+            msg.send(sender, "list-usage-clear");
+            msg.send(sender, "list-usage-footer");
             return true;
         }
 
@@ -479,16 +479,16 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return handleListUsed(sender, args);
         }
 
-        msg.sendRaw(sender, "list-unknown-type", MessageManager.placeholders("type", type));
-        msg.sendRaw(sender, "list-available-types");
+        msg.send(sender, "list-unknown-type", MessageManager.placeholders("type", type));
+        msg.send(sender, "list-available-types");
         return true;
     }
 
     private boolean handleListActive(CommandSender sender) {
-        msg.sendRaw(sender, "list-active-header");
+        msg.send(sender, "list-active-header");
 
         if (codeManager.getAllCodes().isEmpty()) {
-            msg.sendRaw(sender, "list-active-empty");
+            msg.send(sender, "list-active-empty");
             return true;
         }
 
@@ -504,7 +504,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 pUsed = String.valueOf(code.getPlayerUseCount(viewer));
             }
 
-            msg.sendRaw(sender, "list-active-entry", MessageManager.placeholders(
+            msg.send(sender, "list-active-entry", MessageManager.placeholders(
                     "code", code.getName(),
                     "global_used", gUsed,
                     "global_max", gMax,
@@ -513,7 +513,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             ));
         }
 
-        msg.sendRaw(sender, "list-active-footer");
+        msg.send(sender, "list-active-footer");
 
         return true;
     }
@@ -526,17 +526,17 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 if (codeManager.clearUsedCodes()) {
                     msg.send(sender, "list-used-cleared");
                 } else {
-                    msg.sendRaw(sender, "list-used-clear-empty");
+                    msg.send(sender, "list-used-clear-empty");
                 }
                 return true;
             }
         }
 
-        msg.sendRaw(sender, "list-used-header");
+        msg.send(sender, "list-used-header");
 
         var used = codeManager.getUsedCodes();
         if (used.isEmpty()) {
-            msg.sendRaw(sender, "list-used-empty");
+            msg.send(sender, "list-used-empty");
             return true;
         }
 
@@ -552,7 +552,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                 pUsed = String.valueOf(info.playerUses().getOrDefault(viewer, 0));
             }
 
-            msg.sendRaw(sender, "list-used-entry", MessageManager.placeholders(
+            msg.send(sender, "list-used-entry", MessageManager.placeholders(
                     "code", info.name(),
                     "reward", info.rewardDisplay(),
                     "global_used", gUsed,
@@ -562,9 +562,9 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             ));
         }
 
-        msg.sendRaw(sender, "list-used-clear-hint");
+        msg.send(sender, "list-used-clear-hint");
 
-        msg.sendRaw(sender, "list-used-footer");
+        msg.send(sender, "list-used-footer");
         return true;
     }
 
@@ -580,7 +580,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length < 2) {
-            msg.sendRaw(sender, "info-usage");
+            msg.send(sender, "info-usage");
             return true;
         }
 
@@ -590,36 +590,36 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        msg.sendRaw(sender, "info-header", MessageManager.placeholders("code", code.getName()));
+        msg.send(sender, "info-header", MessageManager.placeholders("code", code.getName()));
 
         if (code.isGlobalUnlimited()) {
-            msg.sendRaw(sender, "info-global-uses-unlimited", MessageManager.placeholders(
+            msg.send(sender, "info-global-uses-unlimited", MessageManager.placeholders(
                     "current", String.valueOf(code.getGlobalUses())
             ));
         } else {
-            msg.sendRaw(sender, "info-global-uses", MessageManager.placeholders(
+            msg.send(sender, "info-global-uses", MessageManager.placeholders(
                     "current", String.valueOf(code.getGlobalUses()),
                     "max", String.valueOf(code.getMaxGlobalUses())
             ));
         }
 
         if (code.isPlayerUnlimited()) {
-            msg.sendRaw(sender, "info-player-uses-unlimited");
+            msg.send(sender, "info-player-uses-unlimited");
         } else {
-            msg.sendRaw(sender, "info-player-uses", MessageManager.placeholders(
+            msg.send(sender, "info-player-uses", MessageManager.placeholders(
                     "max", String.valueOf(code.getMaxPlayerUses())
             ));
         }
 
-        msg.sendRaw(sender, "info-delay", MessageManager.placeholders(
+        msg.send(sender, "info-delay", MessageManager.placeholders(
                 "delay", formatDuration(code.getCooldown())
         ));
-        msg.sendRaw(sender, "info-broadcast", MessageManager.placeholders("broadcast", code.getBroadcastDisplay()));
+        msg.send(sender, "info-broadcast", MessageManager.placeholders("broadcast", code.getBroadcastDisplay()));
 
-        msg.sendRaw(sender, "info-reward-type", MessageManager.placeholders("type", code.getRewardType().name()));
-        msg.sendRaw(sender, "info-reward", MessageManager.placeholders("reward", code.getRewardDisplay()));
+        msg.send(sender, "info-reward-type", MessageManager.placeholders("type", code.getRewardType().name()));
+        msg.send(sender, "info-reward", MessageManager.placeholders("reward", code.getRewardDisplay()));
 
-        msg.sendRaw(sender, "info-footer", MessageManager.placeholders("code", code.getName()));
+        msg.send(sender, "info-footer", MessageManager.placeholders("code", code.getName()));
 
         return true;
     }
