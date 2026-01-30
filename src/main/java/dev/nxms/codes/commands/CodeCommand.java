@@ -107,6 +107,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         msg.sendRaw(sender, "help-player-header");
         msg.sendRaw(sender, "help-player-use");
         msg.sendRaw(sender, "help-player-help");
+        msg.sendRaw(sender, "help-player-footer");
     }
 
     private void sendHelpAdmin(CommandSender sender) {
@@ -132,6 +133,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         msg.sendRaw(sender, "help-admin-list-clear");
         msg.sendRaw(sender, "help-admin-info");
         msg.sendRaw(sender, "help-admin-reload");
+        msg.sendRaw(sender, "help-admin-footer");
     }
 
     // ----------------------------
@@ -463,6 +465,7 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
             msg.sendRaw(sender, "list-usage-active");
             msg.sendRaw(sender, "list-usage-used");
             msg.sendRaw(sender, "list-usage-clear");
+            msg.sendRaw(sender, "list-usage-footer");
             return true;
         }
 
@@ -509,6 +512,8 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
                     "player_max", pMax
             ));
         }
+
+        msg.sendRaw(sender, "list-active-footer");
 
         return true;
     }
@@ -558,6 +563,8 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
         }
 
         msg.sendRaw(sender, "list-used-clear-hint");
+
+        msg.sendRaw(sender, "list-used-footer");
         return true;
     }
 
@@ -611,6 +618,8 @@ public class CodeCommand implements CommandExecutor, TabCompleter {
 
         msg.sendRaw(sender, "info-reward-type", MessageManager.placeholders("type", code.getRewardType().name()));
         msg.sendRaw(sender, "info-reward", MessageManager.placeholders("reward", code.getRewardDisplay()));
+
+        msg.sendRaw(sender, "info-footer", MessageManager.placeholders("code", code.getName()));
 
         return true;
     }
