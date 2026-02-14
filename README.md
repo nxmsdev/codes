@@ -129,4 +129,4 @@ language: pl   # or en
 
 Author: [@nxmsdev](https://github.com/nxmsdev)
 
-License: [MIT](https://choosealicense.com/licenses/mit/)
+License: [CC BY-NY 4.0](https://creativecommons.org/licenses/by-nc/4.0/legalcode)
